@@ -91,13 +91,13 @@ public class OpenStackConnectorConfiguration extends AbstractConfiguration
     @Override
     public void release() {
 
-    LOG.info("The release of configuration resources is being performed");
+        LOG.info("The release of configuration resources is being performed");
 
-    this.endpoint=null;
-    this.userId=null;
-    this.secret=null;
-    this.projectName=null;
-    this.domainName=null;
+        this.endpoint = null;
+        this.userId = null;
+        this.secret = null;
+        this.projectName = null;
+        this.domainName = null;
 
     }
 }

@@ -23,12 +23,14 @@ public class OpenStackConnector implements Connector,
         TestOp,
         SchemaOp,
         UpdateOp,
-        UpdateAttributeValuesOp{
+        UpdateAttributeValuesOp {
 
 
     private static final Log LOG = Log.getLog(OpenStackConnector.class);
     private Schema schema = null;
     private OpenStackConnectorConfiguration configuration;
+    private static final String PROJECT_NAME = "Project";
+
 
     @Override
     public Configuration getConfiguration() {
@@ -64,10 +66,13 @@ public class OpenStackConnector implements Connector,
             UserProcessing userProcessing = new UserProcessing(configuration);
             return userProcessing.createUser(attributes);
 
-
         } else if (objectClass.is(ObjectClass.GROUP_NAME)) {
             GroupProcessing groupProcessing = new GroupProcessing(configuration);
             return groupProcessing.createGroup(attributes);
+
+        } else if (objectClass.is(PROJECT_NAME)) {
+            ProjectProcessing projectProcessing = new ProjectProcessing(configuration);
+            return projectProcessing.createProject(attributes);
 
         } else {
             throw new UnsupportedOperationException("Unsupported object class " + objectClass);
@@ -92,11 +97,13 @@ public class OpenStackConnector implements Connector,
             UserProcessing user = new UserProcessing(configuration);
             user.deleteUser(uid);
 
-        }
-        else if (objectClass.is(ObjectClass.GROUP_NAME)) {
+        } else if (objectClass.is(ObjectClass.GROUP_NAME)) {
             GroupProcessing group = new GroupProcessing(configuration);
             group.deleteGroup(uid);
 
+        } else if (objectClass.is(PROJECT_NAME)) {
+            ProjectProcessing project = new ProjectProcessing(configuration);
+            project.deleteProject(uid);
         }
     }
 
@@ -104,11 +111,15 @@ public class OpenStackConnector implements Connector,
     public Schema schema() {
         if (this.schema == null) {
             SchemaBuilder schemaBuilder = new SchemaBuilder(OpenStackConnector.class);
+
             UserProcessing userProcessing = new UserProcessing(configuration);
             GroupProcessing groupProcessing = new GroupProcessing(configuration);
+            ProjectProcessing projectProcessing = new ProjectProcessing(configuration);
 
             userProcessing.buildUserObjectClass(schemaBuilder);
             groupProcessing.buildGroupObjectClass(schemaBuilder);
+            projectProcessing.buildProjectObjectClass(schemaBuilder);
+
 
             return schemaBuilder.build();
         }
@@ -148,12 +159,16 @@ public class OpenStackConnector implements Connector,
 
         if (objectClass.is(ObjectClass.ACCOUNT_NAME)) {
             UserProcessing userProcessing = new UserProcessing(configuration);
-
             userProcessing.executeQueryForUser(query, handler, options);
 
         } else if (objectClass.is(ObjectClass.GROUP_NAME)) {
             GroupProcessing groupProcessing = new GroupProcessing(configuration);
             groupProcessing.executeQueryForGroup(query, handler, options);
+
+        } else if (objectClass.is(PROJECT_NAME)) {
+            ProjectProcessing projectProcessing = new ProjectProcessing(configuration);
+            projectProcessing.executeQueryForProject(query, handler, options);
+
         } else {
             LOG.error("Attribute of type ObjectClass is not supported.");
             throw new UnsupportedOperationException("Attribute of type ObjectClass is not supported.");
@@ -188,7 +203,8 @@ public class OpenStackConnector implements Connector,
 
         }
 
-        return uid;    }
+        return uid;
+    }
 
     @Override
     public Uid removeAttributeValues(ObjectClass objectClass, Uid uid, Set<Attribute> attributes, OperationOptions operationOptions) {
@@ -210,11 +226,12 @@ public class OpenStackConnector implements Connector,
             groupProcessing.removeUserFromGroup(uid, attributes);
         }
 
-        return uid;    }
+        return uid;
+    }
 
     @Override
     public Uid update(ObjectClass objectClass, Uid uid, Set<Attribute> attributes, OperationOptions operationOptions) {
-        LOG.info("From update, object class: {0} uid: {1}, attributes: {2}, opeartionOption: {3}", objectClass, uid.getUidValue(), attributes, operationOptions );
+        LOG.info("From update, object class: {0} uid: {1}, attributes: {2}, opeartionOption: {3}", objectClass, uid.getUidValue(), attributes, operationOptions);
         if (objectClass == null) {
             LOG.error("Parameter of type ObjectClass not provided.");
             throw new InvalidAttributeValueException("Parameter of type ObjectClass not provided.");
@@ -233,10 +250,14 @@ public class OpenStackConnector implements Connector,
             UserProcessing userProcessing = new UserProcessing(configuration);
             userProcessing.updateUser(uid, attributes);
 
-        }
-        else if (objectClass.is(ObjectClass.GROUP_NAME)) {
+        } else if (objectClass.is(ObjectClass.GROUP_NAME)) {
             GroupProcessing groupProcessing = new GroupProcessing(configuration);
             groupProcessing.updateGroup(uid, attributes);
+
+        } else if (objectClass.is(PROJECT_NAME)) {
+            ProjectProcessing projectProcessing = new ProjectProcessing(configuration);
+            projectProcessing.updateProject(uid, attributes);
+
         }
         return uid;
     }

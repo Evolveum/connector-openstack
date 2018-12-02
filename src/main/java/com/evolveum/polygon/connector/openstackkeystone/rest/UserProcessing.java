@@ -6,11 +6,11 @@ import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.openstack4j.api.OSClient.OSClientV3;
+import org.openstack4j.model.identity.v3.Group;
 import org.openstack4j.model.identity.v3.User;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneUser;
-import org.identityconnectors.framework.common.objects.Name;
 
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -24,6 +24,9 @@ public class UserProcessing extends ObjectProcessing {
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
     private static final String DESCRIPTION = "description";
+    private static final String USERGROUPS = "usergroups";
+
+
     //The user ID
     private static final String ID = "id";
 
@@ -66,6 +69,10 @@ public class UserProcessing extends ObjectProcessing {
         attrDescription.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
         userObjClassBuilder.addAttributeInfo(attrDescription.build());
 
+
+        AttributeInfoBuilder attrUserInGroups = new AttributeInfoBuilder(USERGROUPS);
+        attrUserInGroups.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
+        userObjClassBuilder.addAttributeInfo(attrUserInGroups.build());
 
         schemaBuilder.defineObjectClass(userObjClassBuilder.build());
 
@@ -176,9 +183,9 @@ public class UserProcessing extends ObjectProcessing {
 
                 OSClientV3 os = authenticate(getConfiguration());
                 User user = os.identity().users().get(uid.getUidValue());
-                //TODO
-                // os.identity().users().listUserGroups()
-                convertUserToConnectorObject(user, handler);
+
+                List<? extends Group> listUserGroups = os.identity().users().listUserGroups(uid.getUidValue());
+                convertUserToConnectorObject(user, handler, listUserGroups);
 
             } else if (((EqualsFilter) query).getAttribute().getName().equals(NAME)) {
                 LOG.info("((EqualsFilter) query).getAttribute().equals(\"name\")");
@@ -194,7 +201,7 @@ public class UserProcessing extends ObjectProcessing {
                 OSClientV3 os = authenticate(getConfiguration());
                 List<? extends User> users = os.identity().users().getByName(attributeValue);
                 for (User user : users) {
-                    convertUserToConnectorObject(user, handler);
+                    convertUserToConnectorObject(user, handler, null);
                 }
             }
         } else if (query == null) {
@@ -203,7 +210,7 @@ public class UserProcessing extends ObjectProcessing {
             OSClientV3 os = authenticate(getConfiguration());
             List<? extends User> users = os.identity().users().list();
             for (User user : users) {
-                convertUserToConnectorObject(user, handler);
+                convertUserToConnectorObject(user, handler, null);
             }
         }
 
@@ -216,13 +223,13 @@ public class UserProcessing extends ObjectProcessing {
         throw new InvalidAttributeValueException(sb.toString());
     }
 
-    public void convertUserToConnectorObject(User user, ResultsHandler handler) {
+    public void convertUserToConnectorObject(User user, ResultsHandler handler, List<? extends Group> listUserGroups) {
         LOG.info("convertUserToConnectorObject, user: {0}, handler {1}", user, handler);
         if (user != null) {
             ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
             builder.setObjectClass(ObjectClass.ACCOUNT);
             if (user.getId() != null) {
-              //  builder.addAttribute(ID, user.getId());
+                //  builder.addAttribute(ID, user.getId());
                 builder.setUid(new Uid(String.valueOf(user.getId())));
             }
             if (user.getName() != null) {
@@ -248,6 +255,14 @@ public class UserProcessing extends ObjectProcessing {
                 builder.addAttribute(ENABLED, true);
             } else {
                 builder.addAttribute(ENABLED, false);
+            }
+
+            if (listUserGroups != null) {
+                List<String> groupsList = new ArrayList<>(listUserGroups.size());
+                for (Group group : listUserGroups) {
+                    groupsList.add(group.getId());
+                }
+                builder.addAttribute(USERGROUPS, groupsList);
             }
 
             ConnectorObject connectorObject = builder.build();
