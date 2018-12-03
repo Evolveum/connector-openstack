@@ -30,6 +30,7 @@ public class OpenStackConnector implements Connector,
     private Schema schema = null;
     private OpenStackConnectorConfiguration configuration;
     private static final String PROJECT_NAME = "Project";
+    private static final String ROLE_NAME = "Role";
 
 
     @Override
@@ -74,7 +75,11 @@ public class OpenStackConnector implements Connector,
             ProjectProcessing projectProcessing = new ProjectProcessing(configuration);
             return projectProcessing.createProject(attributes);
 
-        } else {
+        } else if (objectClass.is(ROLE_NAME)) {
+            RoleProcessing roleProcessing = new RoleProcessing(configuration);
+            return roleProcessing.createRole(attributes);
+
+        }  else {
             throw new UnsupportedOperationException("Unsupported object class " + objectClass);
         }
     }
@@ -104,6 +109,10 @@ public class OpenStackConnector implements Connector,
         } else if (objectClass.is(PROJECT_NAME)) {
             ProjectProcessing project = new ProjectProcessing(configuration);
             project.deleteProject(uid);
+
+        } else if (objectClass.is(ROLE_NAME)) {
+            RoleProcessing roleProcessing = new RoleProcessing(configuration);
+            roleProcessing.deleteRole(uid);
         }
     }
 
@@ -115,10 +124,12 @@ public class OpenStackConnector implements Connector,
             UserProcessing userProcessing = new UserProcessing(configuration);
             GroupProcessing groupProcessing = new GroupProcessing(configuration);
             ProjectProcessing projectProcessing = new ProjectProcessing(configuration);
+            RoleProcessing roleProcessing = new RoleProcessing(configuration);
 
             userProcessing.buildUserObjectClass(schemaBuilder);
             groupProcessing.buildGroupObjectClass(schemaBuilder);
             projectProcessing.buildProjectObjectClass(schemaBuilder);
+            roleProcessing.buildRoleObjectClass(schemaBuilder);
 
 
             return schemaBuilder.build();
@@ -168,6 +179,10 @@ public class OpenStackConnector implements Connector,
         } else if (objectClass.is(PROJECT_NAME)) {
             ProjectProcessing projectProcessing = new ProjectProcessing(configuration);
             projectProcessing.executeQueryForProject(query, handler, options);
+
+        }else if (objectClass.is(ROLE_NAME)) {
+            RoleProcessing roleProcessing = new RoleProcessing(configuration);
+            roleProcessing.executeQueryForRole(query, handler, options);
 
         } else {
             LOG.error("Attribute of type ObjectClass is not supported.");
@@ -258,7 +273,12 @@ public class OpenStackConnector implements Connector,
             ProjectProcessing projectProcessing = new ProjectProcessing(configuration);
             projectProcessing.updateProject(uid, attributes);
 
+        } else if (objectClass.is(ROLE_NAME)) {
+            RoleProcessing roleProcessing = new RoleProcessing(configuration);
+            roleProcessing.updateRole(uid, attributes);
+
         }
+
         return uid;
     }
 }

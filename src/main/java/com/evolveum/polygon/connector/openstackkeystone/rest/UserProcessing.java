@@ -224,7 +224,7 @@ public class UserProcessing extends ObjectProcessing {
     }
 
     public void convertUserToConnectorObject(User user, ResultsHandler handler, List<? extends Group> listUserGroups) {
-        LOG.info("convertUserToConnectorObject, user: {0}, handler {1}", user, handler);
+        LOG.info("convertRoleToConnectorObject, user: {0}, handler {1}", user, handler);
         if (user != null) {
             ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
             builder.setObjectClass(ObjectClass.ACCOUNT);

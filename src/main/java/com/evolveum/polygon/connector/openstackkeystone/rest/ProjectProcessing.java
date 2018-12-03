@@ -19,7 +19,7 @@ public class ProjectProcessing extends ObjectProcessing {
     private static final String DOMAIN_ID = "domain_id";
     private static final String ENABLED = "enabled";
     private static final String PARENT_ID = "parent_id";
-    protected static final String PROJECT_NAME = "Project";
+    private static final String PROJECT_NAME = "Project";
 
     public ProjectProcessing(OpenStackConnectorConfiguration configuration) {
         super(configuration);
@@ -61,42 +61,42 @@ public class ProjectProcessing extends ObjectProcessing {
 
 
     public Uid createProject(Set<Attribute> attributes) {
-        LOG.info("Start createUser, attributes: {0}", attributes);
+        LOG.info("Start createProject, attributes: {0}", attributes);
 
         if (attributes == null || attributes.isEmpty()) {
             throw new InvalidAttributeValueException("attributes not provided or empty");
         }
 
 
-        KeystoneProject keystoneProject = new KeystoneProject();
+        Project project = new KeystoneProject();
 
         for (Attribute attribute : attributes) {
             if (attribute.getName().equals(NAME)) {
-                keystoneProject.toBuilder().name(AttributeUtil.getAsStringValue(attribute));
+                project.toBuilder().name(AttributeUtil.getAsStringValue(attribute));
             }
 
             if (attribute.getName().equals(DESCRIPTION)) {
-                keystoneProject.toBuilder().description(AttributeUtil.getAsStringValue(attribute));
+                project.toBuilder().description(AttributeUtil.getAsStringValue(attribute));
             }
             if (attribute.getName().equals(DOMAIN_ID)) {
-                keystoneProject.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute));
+                project.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute));
             }
 
             if (attribute.getName().equals(ENABLED)) {
-                keystoneProject.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute));
+                project.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute));
             }
             if (attribute.getName().equals(PARENT_ID)) {
-                keystoneProject.toBuilder().parentId(AttributeUtil.getAsStringValue(attribute));
+                project.toBuilder().parentId(AttributeUtil.getAsStringValue(attribute));
             }
         }
 
 
-        keystoneProject.toBuilder().build();
-        LOG.info("KeystoneProject: {0} ", keystoneProject);
+        project.toBuilder().build();
+        LOG.info("KeystoneProject: {0} ", project);
 
         OSClient.OSClientV3 os = authenticate(getConfiguration());
-        Project createdProject = os.identity().projects().create(keystoneProject);
-        LOG.info("createdKeystoneUser {0}", createdProject);
+        Project createdProject = os.identity().projects().create(project);
+        LOG.info("createdKeystoneProject {0}", createdProject);
         return new Uid(createdProject.getId());
     }
 
@@ -196,7 +196,7 @@ public class ProjectProcessing extends ObjectProcessing {
 
         if (project != null) {
             ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
-            builder.setObjectClass(ObjectClass.ACCOUNT);
+            builder.setObjectClass(new ObjectClass(PROJECT_NAME));
             if (project.getId() != null) {
                 builder.setUid(new Uid(String.valueOf(project.getId())));
             }

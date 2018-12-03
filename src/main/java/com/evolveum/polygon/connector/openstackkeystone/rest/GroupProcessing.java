@@ -194,7 +194,7 @@ public class GroupProcessing extends ObjectProcessing {
     }
 
     public void convertGroupToConnectorObject(Group group, ResultsHandler handler, List<? extends User> listGroupUsers) {
-        LOG.info("convertUserToConnectorObject, group: {0}, handler {1}", group, handler);
+        LOG.info("convertRoleToConnectorObject, group: {0}, handler {1}", group, handler);
         if (group != null) {
             ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
             builder.setObjectClass(ObjectClass.GROUP);
