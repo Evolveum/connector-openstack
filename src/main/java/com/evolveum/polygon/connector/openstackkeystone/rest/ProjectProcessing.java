@@ -121,16 +121,16 @@ public class ProjectProcessing extends ObjectProcessing {
         if (project != null) {
             for (Attribute attribute : attributes) {
 
-                if (attribute.getName().equals("domain_id")) {
+                if (attribute.getName().equals(DOMAIN_ID)) {
                     project = os.identity().projects().update(project.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute)).build());
                 }
-                if (attribute.getName().equals("enabled")) {
+                if (attribute.getName().equals(ENABLED)) {
                     project = os.identity().projects().update(project.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute)).build());
                 }
-                if (attribute.getName().equals("name")) {
+                if (attribute.getName().equals(NAME)) {
                     project = os.identity().projects().update(project.toBuilder().name(AttributeUtil.getAsStringValue(attribute)).build());
                 }
-                if (attribute.getName().equals("description")) {
+                if (attribute.getName().equals(DESCRIPTION)) {
                     project = os.identity().projects().update(project.toBuilder().description(AttributeUtil.getAsStringValue(attribute)).build());
                 }
             }

@@ -58,34 +58,34 @@ public class GroupProcessing extends ObjectProcessing {
     }
 
     public Uid createGroup(Set<Attribute> attributes) {
-        LOG.info("Start createUser, attributes: {0}", attributes);
+        LOG.info("Start createGroup, attributes: {0}", attributes);
 
         if (attributes == null || attributes.isEmpty()) {
             throw new InvalidAttributeValueException("attributes not provided or empty");
         }
 
-        KeystoneGroup keystoneGroup = new KeystoneGroup();
+        Group keystoneGroup = new KeystoneGroup();
 
         for (Attribute attribute : attributes) {
-            if (attribute.getName().equals("domain_id")) {
+            if (attribute.getName().equals(DOMAIN_ID)) {
                 keystoneGroup.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute));
             }
-            if (attribute.getName().equals("name")) {
+            if (attribute.getName().equals(NAME)) {
                 keystoneGroup.toBuilder().name(AttributeUtil.getAsStringValue(attribute));
             }
-            if (attribute.getName().equals("description")) {
+            if (attribute.getName().equals(DESCRIPTION)) {
                 keystoneGroup.toBuilder().description(AttributeUtil.getAsStringValue(attribute));
             }
         }
 
         keystoneGroup.toBuilder().build();
-        LOG.info("KeystoneUser: {0} ", keystoneGroup);
+        LOG.info("KeystoneGroup: {0} ", keystoneGroup);
 
         OSClientV3 os = authenticate(getConfiguration());
 
 
         Group createdGroup = os.identity().groups().create(keystoneGroup);
-        LOG.info("createdKeystoneUser {0}", createdGroup);
+        LOG.info("createdKeystoneGroup {0}", createdGroup);
         return new Uid(createdGroup.getId());
     }
 
@@ -104,7 +104,7 @@ public class GroupProcessing extends ObjectProcessing {
 
         OSClientV3 os = authenticate(getConfiguration());
         Group group = os.identity().groups().get(uid.getUidValue());
-        LOG.info("User is : {0}", group);
+        LOG.info("Group is : {0}", group);
         if (group != null) {
             for (Attribute attribute : attributes) {
                 if (attribute.getName().equals("domain_id")) {
@@ -122,7 +122,7 @@ public class GroupProcessing extends ObjectProcessing {
 //                    group = os.identity().groups().update(group.toBuilder().description(AttributeUtil.getAsStringValue(attribute)).build());
 //                }
             }
-        } else LOG.error("User object is null");
+        } else LOG.error("Group object is null");
     }
 
     public void addUserToGroup(Uid uid, Set<Attribute> attributes) {
@@ -141,7 +141,7 @@ public class GroupProcessing extends ObjectProcessing {
     }
 
     public void executeQueryForGroup(Filter query, ResultsHandler handler, OperationOptions options) {
-        LOG.info("executeQueryForUser()");
+        LOG.info("executeQueryForGroup()");
         if (query instanceof EqualsFilter) {
             LOG.info("query instanceof EqualsFilter");
             if (((EqualsFilter) query).getAttribute() instanceof Uid) {
@@ -172,7 +172,8 @@ public class GroupProcessing extends ObjectProcessing {
                 OSClientV3 os = authenticate(getConfiguration());
                 List<? extends Group> groups = os.identity().groups().getByName(attributeValue);
                 for (Group group : groups) {
-                    convertGroupToConnectorObject(group, handler, null);
+                    List<? extends User> listGroupUsers = os.identity().groups().listGroupUsers(group.getId());
+                    convertGroupToConnectorObject(group, handler, listGroupUsers);
                 }
             }
         } else if (query == null) {
@@ -182,7 +183,8 @@ public class GroupProcessing extends ObjectProcessing {
 
             List<? extends Group> groups = os.identity().groups().list();
             for (Group group : groups) {
-                convertGroupToConnectorObject(group, handler, null);
+                List<? extends User> listGroupUsers = os.identity().groups().listGroupUsers(group.getId());
+                convertGroupToConnectorObject(group, handler, listGroupUsers);
             }
         }
     }
@@ -194,7 +196,7 @@ public class GroupProcessing extends ObjectProcessing {
     }
 
     public void convertGroupToConnectorObject(Group group, ResultsHandler handler, List<? extends User> listGroupUsers) {
-        LOG.info("convertRoleToConnectorObject, group: {0}, handler {1}", group, handler);
+        LOG.info("convertGroupToConnectorObject, group: {0}, handler {1}", group, handler);
         if (group != null) {
             ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
             builder.setObjectClass(ObjectClass.GROUP);
@@ -225,7 +227,7 @@ public class GroupProcessing extends ObjectProcessing {
             ConnectorObject connectorObject = builder.build();
             handler.handle(connectorObject);
 
-        } else LOG.error("User object is null!");
+        } else LOG.error("Group object is null!");
     }
 
 }

@@ -93,11 +93,11 @@ public class RoleProcessing extends ObjectProcessing {
         if (role != null) {
             for (Attribute attribute : attributes) {
 
-                if (attribute.getName().equals("domain_id")) {
+                if (attribute.getName().equals(DOMAIN_ID)) {
                     role = os.identity().roles().update(role.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute)).build());
                 }
 
-                if (attribute.getName().equals("name")) {
+                if (attribute.getName().equals(NAME)) {
                     role = os.identity().roles().update(role.toBuilder().name(AttributeUtil.getAsStringValue(attribute)).build());
                 }
             }

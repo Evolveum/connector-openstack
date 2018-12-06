@@ -31,6 +31,8 @@ public class OpenStackConnector implements Connector,
     private OpenStackConnectorConfiguration configuration;
     private static final String PROJECT_NAME = "Project";
     private static final String ROLE_NAME = "Role";
+    private static final String DOMAIN_NAME = "Domain";
+
 
 
     @Override
@@ -79,7 +81,11 @@ public class OpenStackConnector implements Connector,
             RoleProcessing roleProcessing = new RoleProcessing(configuration);
             return roleProcessing.createRole(attributes);
 
-        }  else {
+        }  else if (objectClass.is(DOMAIN_NAME)) {
+            DomainProcessing domainProcessing = new DomainProcessing(configuration);
+            return domainProcessing.createDomain(attributes);
+
+        } else {
             throw new UnsupportedOperationException("Unsupported object class " + objectClass);
         }
     }
@@ -113,6 +119,10 @@ public class OpenStackConnector implements Connector,
         } else if (objectClass.is(ROLE_NAME)) {
             RoleProcessing roleProcessing = new RoleProcessing(configuration);
             roleProcessing.deleteRole(uid);
+
+        }else if (objectClass.is(DOMAIN_NAME)) {
+            DomainProcessing domainProcessing = new DomainProcessing(configuration);
+            domainProcessing.deleteDomain(uid);
         }
     }
 
@@ -125,11 +135,13 @@ public class OpenStackConnector implements Connector,
             GroupProcessing groupProcessing = new GroupProcessing(configuration);
             ProjectProcessing projectProcessing = new ProjectProcessing(configuration);
             RoleProcessing roleProcessing = new RoleProcessing(configuration);
+            DomainProcessing domainProcessing = new DomainProcessing(configuration);
 
             userProcessing.buildUserObjectClass(schemaBuilder);
             groupProcessing.buildGroupObjectClass(schemaBuilder);
             projectProcessing.buildProjectObjectClass(schemaBuilder);
             roleProcessing.buildRoleObjectClass(schemaBuilder);
+            domainProcessing.buildDomainObjectClass(schemaBuilder);
 
 
             return schemaBuilder.build();
@@ -183,6 +195,10 @@ public class OpenStackConnector implements Connector,
         }else if (objectClass.is(ROLE_NAME)) {
             RoleProcessing roleProcessing = new RoleProcessing(configuration);
             roleProcessing.executeQueryForRole(query, handler, options);
+
+        }else if (objectClass.is(DOMAIN_NAME)) {
+            DomainProcessing domainProcessing = new DomainProcessing(configuration);
+            domainProcessing.executeQueryForDomain(query, handler, options);
 
         } else {
             LOG.error("Attribute of type ObjectClass is not supported.");
@@ -276,6 +292,10 @@ public class OpenStackConnector implements Connector,
         } else if (objectClass.is(ROLE_NAME)) {
             RoleProcessing roleProcessing = new RoleProcessing(configuration);
             roleProcessing.updateRole(uid, attributes);
+
+        } else if (objectClass.is(DOMAIN_NAME)) {
+            DomainProcessing domainProcessing = new DomainProcessing(configuration);
+            domainProcessing.updateDomain(uid, attributes);
 
         }
 
