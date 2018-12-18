@@ -1,5 +1,6 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
@@ -13,8 +14,10 @@ import java.util.Set;
 
 public class ProjectProcessing extends ObjectProcessing {
 
-
+    //required
     private static final String NAME = "name";
+
+    //optional
     private static final String DESCRIPTION = "description";
     private static final String DOMAIN_ID = "domain_id";
     private static final String ENABLED = "enabled";
@@ -69,12 +72,16 @@ public class ProjectProcessing extends ObjectProcessing {
 
 
         Project project = new KeystoneProject();
+        boolean set_required_attribute_name = false;
 
         for (Attribute attribute : attributes) {
             if (attribute.getName().equals(NAME)) {
-                project.toBuilder().name(AttributeUtil.getAsStringValue(attribute));
+                String userName = AttributeUtil.getAsStringValue(attribute);
+                if (!StringUtil.isBlank(userName)) {
+                    project.toBuilder().name(userName);
+                    set_required_attribute_name = true;
+                }
             }
-
             if (attribute.getName().equals(DESCRIPTION)) {
                 project.toBuilder().description(AttributeUtil.getAsStringValue(attribute));
             }
@@ -90,6 +97,10 @@ public class ProjectProcessing extends ObjectProcessing {
             }
         }
 
+        //project name is not set or is empty
+        if (!set_required_attribute_name) {
+            throw new InvalidAttributeValueException("Missing value of required attribute name in Project");
+        }
 
         project.toBuilder().build();
         LOG.info("KeystoneProject: {0} ", project);

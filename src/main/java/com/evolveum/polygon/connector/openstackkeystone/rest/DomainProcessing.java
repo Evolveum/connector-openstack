@@ -1,5 +1,6 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
@@ -16,11 +17,13 @@ public class DomainProcessing extends ObjectProcessing {
         super(configuration);
     }
 
+    //required
+    private static final String NAME = "name";
+
+    //optional
     private static final String DOMAIN_NAME = "Domain";
     private static final String DESCRIPTION = "description";
     private static final String ENABLED = "enabled";
-    //required
-    private static final String NAME = "name";
 
 
     public void buildDomainObjectClass(SchemaBuilder schemaBuilder) {
@@ -53,12 +56,16 @@ public class DomainProcessing extends ObjectProcessing {
             throw new InvalidAttributeValueException("attributes not provided or empty");
         }
 
-
         Domain domain = new KeystoneDomain();
+        boolean set_required_attribute_name = false;
 
         for (Attribute attribute : attributes) {
             if (attribute.getName().equals(NAME)) {
-                domain.toBuilder().name(AttributeUtil.getAsStringValue(attribute));
+                String domainName = AttributeUtil.getAsStringValue(attribute);
+                if (!StringUtil.isBlank(domainName)) {
+                    domain.toBuilder().name(domainName);
+                    set_required_attribute_name = true;
+                }
             }
 
             if (attribute.getName().equals(DESCRIPTION)) {
@@ -70,6 +77,10 @@ public class DomainProcessing extends ObjectProcessing {
             }
         }
 
+        //domain name is not set or is empty
+        if (!set_required_attribute_name) {
+            throw new InvalidAttributeValueException("Missing value of required attribute name in Domain");
+        }
 
         domain.toBuilder().build();
         LOG.info("KeystoneDomain: {0} ", domain);

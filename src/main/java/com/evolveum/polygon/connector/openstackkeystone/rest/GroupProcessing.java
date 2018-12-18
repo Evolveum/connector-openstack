@@ -1,5 +1,6 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
@@ -15,10 +16,12 @@ import java.util.Set;
 
 public class GroupProcessing extends ObjectProcessing {
 
-    private static final String DESCRIPTION = "description";
-    private static final String DOMAIN_ID = "domain_id";
     //required
     private static final String NAME = "name";
+
+    //optional
+    private static final String DESCRIPTION = "description";
+    private static final String DOMAIN_ID = "domain_id";
 
 
     private static final String ID = "id";
@@ -64,27 +67,37 @@ public class GroupProcessing extends ObjectProcessing {
             throw new InvalidAttributeValueException("attributes not provided or empty");
         }
 
-        Group keystoneGroup = new KeystoneGroup();
+        Group group = new KeystoneGroup();
+        boolean set_required_attribute_name = false;
 
         for (Attribute attribute : attributes) {
             if (attribute.getName().equals(DOMAIN_ID)) {
-                keystoneGroup.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute));
+                String groupName = AttributeUtil.getAsStringValue(attribute);
+                if (!StringUtil.isBlank(groupName)) {
+                    group.toBuilder().name(groupName);
+                    set_required_attribute_name = true;
+                }
             }
             if (attribute.getName().equals(NAME)) {
-                keystoneGroup.toBuilder().name(AttributeUtil.getAsStringValue(attribute));
+                group.toBuilder().name(AttributeUtil.getAsStringValue(attribute));
             }
             if (attribute.getName().equals(DESCRIPTION)) {
-                keystoneGroup.toBuilder().description(AttributeUtil.getAsStringValue(attribute));
+                group.toBuilder().description(AttributeUtil.getAsStringValue(attribute));
             }
         }
 
-        keystoneGroup.toBuilder().build();
-        LOG.info("KeystoneGroup: {0} ", keystoneGroup);
+        //group name is not set or is empty
+        if (!set_required_attribute_name) {
+            throw new InvalidAttributeValueException("Missing value of required attribute name in Group");
+        }
+
+        group.toBuilder().build();
+        LOG.info("KeystoneGroup: {0} ", group);
 
         OSClientV3 os = authenticate(getConfiguration());
 
 
-        Group createdGroup = os.identity().groups().create(keystoneGroup);
+        Group createdGroup = os.identity().groups().create(group);
         LOG.info("createdKeystoneGroup {0}", createdGroup);
         return new Uid(createdGroup.getId());
     }

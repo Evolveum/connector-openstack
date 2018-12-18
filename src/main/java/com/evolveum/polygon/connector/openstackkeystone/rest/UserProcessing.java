@@ -1,11 +1,14 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
 
+import org.identityconnectors.common.StringUtil;
+import org.identityconnectors.framework.common.exceptions.AlreadyExistsException;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.openstack4j.api.OSClient.OSClientV3;
+import org.openstack4j.api.exceptions.ClientResponseException;
 import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.identity.v3.Group;
 import org.openstack4j.model.identity.v3.User;
@@ -17,15 +20,18 @@ import java.util.Set;
 
 public class UserProcessing extends ObjectProcessing {
 
-    private static final String DEFAULT_PROJECT_ID = "default_project_id";
-    private static final String DOMAIN_ID = "domain_id";
-
-    private static final String ENABLED = "enabled";
     //required
     private static final String NAME = "name";
+
+    //optional
+    private static final String DEFAULT_PROJECT_ID = "default_project_id";
+    private static final String DOMAIN_ID = "domain_id";
+    private static final String ENABLED = "enabled";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
     private static final String DESCRIPTION = "description";
+
+
     private static final String USERGROUPS = "usergroups";
 
 
@@ -89,39 +95,48 @@ public class UserProcessing extends ObjectProcessing {
             throw new InvalidAttributeValueException("attributes not provided or empty");
         }
 
-        User keystoneUser = new KeystoneUser();
+        User user = new KeystoneUser();
+        boolean set_required_attribute_name = false;
 
         for (Attribute attribute : attributes) {
+            if (attribute.getName().equals(NAME)) {
+                String userName = AttributeUtil.getAsStringValue(attribute);
+                if (!StringUtil.isBlank(userName)) {
+                    user.toBuilder().name(userName);
+                    set_required_attribute_name = true;
+                }
+            }
             if (attribute.getName().equals(DEFAULT_PROJECT_ID)) {
-                keystoneUser.toBuilder().defaultProjectId(AttributeUtil.getAsStringValue(attribute));
+                user.toBuilder().defaultProjectId(AttributeUtil.getAsStringValue(attribute));
             }
             if (attribute.getName().equals(DOMAIN_ID)) {
-                keystoneUser.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute));
+                user.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute));
             }
             if (attribute.getName().equals(ENABLED)) {
-                keystoneUser.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute));
-            }
-            if (attribute.getName().equals(NAME)) {
-                keystoneUser.toBuilder().name(AttributeUtil.getAsStringValue(attribute));
+                user.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute));
             }
             if (attribute.getName().equals(PASSWORD)) {
-                keystoneUser.toBuilder().password(AttributeUtil.getAsStringValue(attribute));
+                user.toBuilder().password(AttributeUtil.getAsStringValue(attribute));
             }
             if (attribute.getName().equals(EMAIL)) {
-                keystoneUser.toBuilder().email(AttributeUtil.getAsStringValue(attribute));
+                user.toBuilder().email(AttributeUtil.getAsStringValue(attribute));
             }
             if (attribute.getName().equals(DESCRIPTION)) {
-                keystoneUser.toBuilder().description(AttributeUtil.getAsStringValue(attribute));
+                user.toBuilder().description(AttributeUtil.getAsStringValue(attribute));
             }
         }
 
-        keystoneUser.toBuilder().build();
-        LOG.info("KeystoneUser: {0} ", keystoneUser);
+        //user name is not set or is empty
+        if (!set_required_attribute_name) {
+            throw new InvalidAttributeValueException("Missing value of required attribute name in User");
+        }
+
+        user.toBuilder().build();
+        LOG.info("KeystoneUser: {0} ", user);
 
         OSClientV3 os = authenticate(getConfiguration());
 
-
-        User createdUser = os.identity().users().create(keystoneUser);
+        User createdUser = os.identity().users().create(user);
         LOG.info("createdKeystoneUser {0}", createdUser);
         return new Uid(createdUser.getId());
     }

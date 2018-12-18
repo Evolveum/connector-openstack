@@ -1,5 +1,6 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
@@ -14,9 +15,13 @@ import java.util.Set;
 
 public class RoleProcessing extends ObjectProcessing {
 
-    private static final String DOMAIN_ID = "domain_id";
     //required
     private static final String NAME = "name";
+
+    //optional
+    private static final String DESCRIPTION = "description";
+    private static final String DOMAIN_ID = "domain_id";
+
     private static final String ROLE_NAME = "Role";
 
     public RoleProcessing(OpenStackConnectorConfiguration configuration) {
@@ -38,6 +43,10 @@ public class RoleProcessing extends ObjectProcessing {
         attrDomain_id.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
         roleObjClassBuilder.addAttributeInfo(attrDomain_id.build());
 
+        AttributeInfoBuilder attrDescription = new AttributeInfoBuilder(DESCRIPTION);
+        attrDescription.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
+        roleObjClassBuilder.addAttributeInfo(attrDescription.build());
+
 
         schemaBuilder.defineObjectClass(roleObjClassBuilder.build());
 
@@ -53,16 +62,25 @@ public class RoleProcessing extends ObjectProcessing {
         }
 
         Role role = new KeystoneRole();
+        boolean set_required_attribute_name = false;
 
         for (Attribute attribute : attributes) {
-
+            if (attribute.getName().equals(NAME)) {
+                String roleName = AttributeUtil.getAsStringValue(attribute);
+                if (!StringUtil.isBlank(roleName)) {
+                    role.toBuilder().name(roleName);
+                    set_required_attribute_name = true;
+                }
+            }
             if (attribute.getName().equals(DOMAIN_ID)) {
                 role.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute));
             }
-            if (attribute.getName().equals(NAME)) {
-                role.toBuilder().name(AttributeUtil.getAsStringValue(attribute));
-            }
 
+        }
+
+        //role name is not set or is empty
+        if (!set_required_attribute_name) {
+            throw new InvalidAttributeValueException("Missing value of required attribute name in Group");
         }
 
         role.toBuilder().build();
