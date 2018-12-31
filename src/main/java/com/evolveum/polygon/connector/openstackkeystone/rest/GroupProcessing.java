@@ -9,7 +9,7 @@ import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.identity.v3.Group;
 import org.openstack4j.model.identity.v3.User;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneGroup;
-
+import org.identityconnectors.framework.common.exceptions.UnknownUidException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -71,14 +71,14 @@ public class GroupProcessing extends ObjectProcessing {
         boolean set_required_attribute_name = false;
 
         for (Attribute attribute : attributes) {
-            if (attribute.getName().equals(DOMAIN_ID)) {
+            if (attribute.getName().equals(NAME)) {
                 String groupName = AttributeUtil.getAsStringValue(attribute);
                 if (!StringUtil.isBlank(groupName)) {
                     group.toBuilder().name(groupName);
                     set_required_attribute_name = true;
                 }
             }
-            if (attribute.getName().equals(NAME)) {
+            if (attribute.getName().equals(DOMAIN_ID)) {
                 group.toBuilder().name(AttributeUtil.getAsStringValue(attribute));
             }
             if (attribute.getName().equals(DESCRIPTION)) {
@@ -135,7 +135,7 @@ public class GroupProcessing extends ObjectProcessing {
 //                    group = os.identity().groups().update(group.toBuilder().description(AttributeUtil.getAsStringValue(attribute)).build());
 //                }
             }
-        } else LOG.error("Group object is null");
+        } else throw new UnknownUidException("Returned Group object is null");
     }
 
     public void addUserToGroup(Uid uid, Set<Attribute> attributes) {
@@ -240,7 +240,7 @@ public class GroupProcessing extends ObjectProcessing {
             ConnectorObject connectorObject = builder.build();
             handler.handle(connectorObject);
 
-        } else LOG.error("Group object is null!");
+        } else throw new UnknownUidException("Returned Group object is null");
     }
 
 }

@@ -4,6 +4,7 @@ package com.evolveum.polygon.connector.openstackkeystone.rest;
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.common.exceptions.AlreadyExistsException;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
+import org.identityconnectors.framework.common.exceptions.UnknownUidException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
@@ -181,7 +182,7 @@ public class UserProcessing extends ObjectProcessing {
                     user = os.identity().users().update(user.toBuilder().description(AttributeUtil.getAsStringValue(attribute)).build());
                 }
             }
-        } else LOG.error("User object is null");
+        } else throw new UnknownUidException("Returned User object is null");
     }
 
     public void executeQueryForUser(Filter query, ResultsHandler handler, OperationOptions options) {
@@ -285,6 +286,6 @@ public class UserProcessing extends ObjectProcessing {
             ConnectorObject connectorObject = builder.build();
             handler.handle(connectorObject);
 
-        } else LOG.error("User object is null!");
+        } else throw new UnknownUidException("Returned User object is null");
     }
 }

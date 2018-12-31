@@ -2,6 +2,7 @@ package com.evolveum.polygon.connector.openstackkeystone.rest;
 
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
+import org.identityconnectors.framework.common.exceptions.UnknownUidException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
@@ -123,7 +124,7 @@ public class DomainProcessing extends ObjectProcessing {
                     domain = os.identity().domains().update(domain.toBuilder().description(AttributeUtil.getAsStringValue(attribute)).build());
                 }
             }
-        } else LOG.error("Domain object is null");
+        } else throw new UnknownUidException("Returned Domain object is null");
 
 
     }
@@ -205,7 +206,7 @@ public class DomainProcessing extends ObjectProcessing {
             ConnectorObject connectorObject = builder.build();
             handler.handle(connectorObject);
 
-        } else LOG.error("domain object is null!");
+        } else throw new UnknownUidException("Returned Domain object is null");
 
     }
 

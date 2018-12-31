@@ -2,6 +2,7 @@ package com.evolveum.polygon.connector.openstackkeystone.rest;
 
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
+import org.identityconnectors.framework.common.exceptions.UnknownUidException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
@@ -119,7 +120,7 @@ public class RoleProcessing extends ObjectProcessing {
                     role = os.identity().roles().update(role.toBuilder().name(AttributeUtil.getAsStringValue(attribute)).build());
                 }
             }
-        } else LOG.error("Role object is null");
+        }  else throw new UnknownUidException("Returned Role object is null");
     }
 
     public void executeQueryForRole(Filter query, ResultsHandler handler, OperationOptions options) {
@@ -197,7 +198,7 @@ public class RoleProcessing extends ObjectProcessing {
             ConnectorObject connectorObject = builder.build();
             handler.handle(connectorObject);
 
-        } else LOG.error("Role object is null!");
+        } else throw new UnknownUidException("Returned Role object is null");
     }
 
 }
