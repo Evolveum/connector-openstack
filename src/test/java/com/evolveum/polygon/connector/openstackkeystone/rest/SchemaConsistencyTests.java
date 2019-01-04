@@ -271,10 +271,14 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
                 }
             }
         }
+
+        GuardedString pass = new GuardedString("AccountExample".toCharArray());
+        attributesAccount.add(AttributeBuilder.build("__PASSWORD__",pass));
+
         ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
         Uid uidAccount = openStackConnector.create(objectClassAccount, attributesAccount, options);
 
-        attributesAccount.remove(AttributeBuilder.build("password","AccountExample"));
+        attributesAccount.remove(AttributeBuilder.build("__PASSWORD__",pass));
 
 
         AttributeFilter filterAccount;
@@ -295,6 +299,12 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
         };
 
         openStackConnector.executeQuery(objectClassAccount, filterAccount, handlerAccount, options);
+
+        System.out.println("\n\n");
+        System.out.println(attributesAccount);
+        System.out.println("\n\n");
+        System.out.println(resultsAccount.get(0).getAttributes());
+        System.out.println("\n\n");
 
         try {
             if(!resultsAccount.get(0).getAttributes().containsAll(attributesAccount)){

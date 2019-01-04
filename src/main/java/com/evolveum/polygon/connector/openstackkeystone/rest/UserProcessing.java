@@ -1,7 +1,9 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
 
+import com.evolveum.polygon.common.GuardedStringAccessor;
 import org.identityconnectors.common.StringUtil;
+import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.common.exceptions.AlreadyExistsException;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
 import org.identityconnectors.framework.common.exceptions.UnknownUidException;
@@ -52,6 +54,7 @@ public class UserProcessing extends ObjectProcessing {
 
         userObjClassBuilder.setType(ObjectClass.ACCOUNT_NAME);
 
+
 //        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
 //        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
 //        userObjClassBuilder.addAttributeInfo(attrName.build());
@@ -68,9 +71,12 @@ public class UserProcessing extends ObjectProcessing {
         attrEnabled.setRequired(false).setType(Boolean.class).setCreateable(true).setUpdateable(true).setReadable(true);
         userObjClassBuilder.addAttributeInfo(attrEnabled.build());
 
-        AttributeInfoBuilder attrPassword = new AttributeInfoBuilder(PASSWORD);
-        attrPassword.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
-        userObjClassBuilder.addAttributeInfo(attrPassword.build());
+//        AttributeInfoBuilder attrPassword = new AttributeInfoBuilder(PASSWORD);
+//        attrPassword.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
+//        userObjClassBuilder.addAttributeInfo(attrPassword.build());
+
+        userObjClassBuilder.addAttributeInfo(OperationalAttributeInfos.PASSWORD);
+
 
         AttributeInfoBuilder attrEmail = new AttributeInfoBuilder(EMAIL);
         attrEmail.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
@@ -122,8 +128,11 @@ public class UserProcessing extends ObjectProcessing {
             if (attribute.getName().equals(ENABLED)) {
                 user.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute));
             }
-            if (attribute.getName().equals(PASSWORD)) {
-                user.toBuilder().password(AttributeUtil.getAsStringValue(attribute));
+            if (attribute.getName().equals(OperationalAttributes.PASSWORD_NAME)) {
+                GuardedString guardedString = (GuardedString) AttributeUtil.getSingleValue(attribute);
+                GuardedStringAccessor accessor = new GuardedStringAccessor();
+                guardedString.access(accessor);
+                user.toBuilder().password(accessor.getClearString());
             }
             if (attribute.getName().equals(EMAIL)) {
                 user.toBuilder().email(AttributeUtil.getAsStringValue(attribute));
@@ -178,8 +187,11 @@ public class UserProcessing extends ObjectProcessing {
                 if (attribute.getName().equals(Name.NAME)) {
                     user = os.identity().users().update(user.toBuilder().name(AttributeUtil.getAsStringValue(attribute)).build());
                 }
-                if (attribute.getName().equals(PASSWORD)) {
-                    user = os.identity().users().update(user.toBuilder().password(AttributeUtil.getAsStringValue(attribute)).build());
+                if (attribute.getName().equals(OperationalAttributes.PASSWORD_NAME)) {
+                    GuardedString guardedString = (GuardedString) AttributeUtil.getSingleValue(attribute);
+                    GuardedStringAccessor accessor = new GuardedStringAccessor();
+                    guardedString.access(accessor);
+                    user = os.identity().users().update(user.toBuilder().password(accessor.getClearString()).build());
                 }
                 if (attribute.getName().equals(EMAIL)) {
                     user = os.identity().users().update(user.toBuilder().email(AttributeUtil.getAsStringValue(attribute)).build());

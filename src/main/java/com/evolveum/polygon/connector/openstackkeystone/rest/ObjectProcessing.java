@@ -1,7 +1,10 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
 
+import com.evolveum.polygon.common.GuardedStringAccessor;
 import org.identityconnectors.common.logging.Log;
+import org.identityconnectors.common.security.GuardedString;
+import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.common.Identifier;
 import org.openstack4j.openstack.OSFactory;
@@ -23,9 +26,12 @@ public class ObjectProcessing {
 
         //        # Scoping to a project just by name isn't possible as the project name is only unique within a domain.
         //# You can either use this as the id of the project is unique across domains
+        GuardedString guardedString = configuration.getSecret();
+        GuardedStringAccessor accessor = new GuardedStringAccessor();
+        guardedString.access(accessor);
         return OSFactory.builderV3()
                 .endpoint(configuration.getEndpoint())
-                .credentials(configuration.getUserId(), configuration.getSecret())
+                .credentials(configuration.getUserId(), accessor.getClearString())
                 .scopeToProject(Identifier.byName(configuration.getProjectName()), Identifier.byName(configuration.getDomainName()))
                 .authenticate();
 

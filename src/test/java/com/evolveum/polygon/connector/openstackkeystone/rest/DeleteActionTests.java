@@ -1,6 +1,7 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
 
+import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.common.exceptions.UnknownUidException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.AttributeFilter;
@@ -218,11 +219,13 @@ public class DeleteActionTests extends BasicConfigurationForTests {
         attributesCreatedUser.add(AttributeBuilder.build("__NAME__", "Banzai"));
         attributesCreatedUser.add(AttributeBuilder.build("description","Cartoon"));
         attributesCreatedUser.add(AttributeBuilder.build("enabled", true));
-        attributesCreatedUser.add(AttributeBuilder.build("password", "LionKing99"));
+//        attributesCreatedUser.add(AttributeBuilder.build("password", "LionKing99"));
         attributesCreatedUser.add(AttributeBuilder.build("domain_id", "default"));
         attributesCreatedUser.add(AttributeBuilder.build("default_project_id", "project"));
         attributesCreatedUser.add(AttributeBuilder.build("email", "lionking@mail.com"));
 
+        GuardedString pass = new GuardedString("LionKing99".toCharArray());
+        attributesCreatedUser.add(AttributeBuilder.build("__PASSWORD__",pass));
 
         ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
 

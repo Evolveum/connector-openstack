@@ -27,7 +27,7 @@
     </parent>
 
     <artifactId>connector-openStack-Keystone</artifactId>
-    <version>0.15</version>
+    <version>0.23</version>
     <packaging>jar</packaging>
 
     <name>OpenStackConnector</name>
@@ -78,16 +78,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20180130</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.6</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
@@ -102,33 +92,24 @@
             <groupId>com.evolveum.polygon</groupId>
             <version>1.4.2.18</version>
         </dependency>
-
         <dependency>
             <groupId>net.tirasa.connid</groupId>
             <artifactId>connector-framework</artifactId>
             <version>1.4.3.0</version>
         </dependency>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.5</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.6</version>
-            <scope>compile</scope>
+            <groupId>com.evolveum.polygon</groupId>
+            <artifactId>connector-common</artifactId>
+            <version>1.4.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.pacesys</groupId>
             <artifactId>openstack4j</artifactId>
             <version>3.1.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.8</version>
-        </dependency>
+
+
+
     </dependencies>
 
 </project>

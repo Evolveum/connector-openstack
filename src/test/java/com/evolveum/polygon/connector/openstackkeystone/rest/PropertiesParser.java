@@ -1,6 +1,7 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
 import org.identityconnectors.common.logging.Log;
+import org.identityconnectors.common.security.GuardedString;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -47,8 +48,8 @@ public class PropertiesParser {
         return (String) properties.get(USERID);
     }
 
-    public String getSecret() {
-        return (String) properties.get(SECRET);
+    public GuardedString getSecret() {
+        return new GuardedString(((String)properties.get(SECRET)).toCharArray());
     }
 
     public String getProjectName() {

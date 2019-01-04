@@ -1,9 +1,12 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
 
+import com.evolveum.polygon.common.GuardedStringAccessor;
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.logging.Log;
+import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.common.exceptions.ConfigurationException;
+import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.identityconnectors.framework.spi.AbstractConfiguration;
 import org.identityconnectors.framework.spi.ConfigurationProperty;
 import org.identityconnectors.framework.spi.StatefulConfiguration;
@@ -15,7 +18,7 @@ public class OpenStackConnectorConfiguration extends AbstractConfiguration
 
     private String endpoint;
     private String userId;
-    private String secret;
+    private GuardedString secret;
     private String projectName;
     private String domainName;
 
@@ -38,11 +41,11 @@ public class OpenStackConnectorConfiguration extends AbstractConfiguration
     }
 
     @ConfigurationProperty(order = 3, displayMessageKey = "credentials - secret", required = true)
-    public String getSecret() {
+    public GuardedString getSecret() {
         return secret;
     }
 
-    public void setSecret(String secret) {
+    public void setSecret(GuardedString secret) {
         this.secret = secret;
     }
 
@@ -75,7 +78,9 @@ public class OpenStackConnectorConfiguration extends AbstractConfiguration
         if (StringUtil.isBlank(userId)) {
             throw new ConfigurationException("userId cannot be empty.");
         }
-        if (StringUtil.isBlank(secret)) {
+        GuardedStringAccessor accessor = new GuardedStringAccessor();
+        secret.access(accessor);
+        if ("".equals(accessor.getClearString())) {
             throw new ConfigurationException("secret cannot be empty.");
         }
         if (StringUtil.isBlank(projectName)) {
@@ -95,7 +100,7 @@ public class OpenStackConnectorConfiguration extends AbstractConfiguration
 
         this.endpoint = null;
         this.userId = null;
-        this.secret = null;
+        this.secret.dispose();
         this.projectName = null;
         this.domainName = null;
 
