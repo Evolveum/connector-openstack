@@ -10,6 +10,7 @@ import org.openstack4j.api.OSClient;
 import org.openstack4j.model.identity.v3.Role;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneRole;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -25,6 +26,8 @@ public class RoleProcessing extends ObjectProcessing {
 
     private static final String ROLE_NAME = "Role";
 
+    private static final String LINKS = "links";
+
     public RoleProcessing(OpenStackConnectorConfiguration configuration) {
         super(configuration);
     }
@@ -35,19 +38,24 @@ public class RoleProcessing extends ObjectProcessing {
 
         roleObjClassBuilder.setType(ROLE_NAME);
 
-        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
-        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
-        roleObjClassBuilder.addAttributeInfo(attrName.build());
+//        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
+//        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
+//        roleObjClassBuilder.addAttributeInfo(attrName.build());
 
 
         AttributeInfoBuilder attrDomain_id = new AttributeInfoBuilder(DOMAIN_ID);
         attrDomain_id.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
         roleObjClassBuilder.addAttributeInfo(attrDomain_id.build());
 
-        AttributeInfoBuilder attrDescription = new AttributeInfoBuilder(DESCRIPTION);
-        attrDescription.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
-        roleObjClassBuilder.addAttributeInfo(attrDescription.build());
+        //not implemented in api... but still exist (http://developer.openstack.org/api-ref-identity-v3.html#roles-v3)
+//        AttributeInfoBuilder attrDescription = new AttributeInfoBuilder(DESCRIPTION);
+//        attrDescription.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
+//        roleObjClassBuilder.addAttributeInfo(attrDescription.build());
 
+        //read-only && multi-valued
+        AttributeInfoBuilder attrLinks = new AttributeInfoBuilder(LINKS);
+        attrLinks.setRequired(false).setType(String.class).setCreateable(false).setUpdateable(false).setReadable(true).setMultiValued(true);
+        roleObjClassBuilder.addAttributeInfo(attrLinks.build());
 
         schemaBuilder.defineObjectClass(roleObjClassBuilder.build());
 
@@ -66,7 +74,7 @@ public class RoleProcessing extends ObjectProcessing {
         boolean set_required_attribute_name = false;
 
         for (Attribute attribute : attributes) {
-            if (attribute.getName().equals(NAME)) {
+            if (attribute.getName().equals(Name.NAME)) {
                 String roleName = AttributeUtil.getAsStringValue(attribute);
                 if (!StringUtil.isBlank(roleName)) {
                     role.toBuilder().name(roleName);
@@ -116,7 +124,7 @@ public class RoleProcessing extends ObjectProcessing {
                     role = os.identity().roles().update(role.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute)).build());
                 }
 
-                if (attribute.getName().equals(NAME)) {
+                if (attribute.getName().equals(Name.NAME)) {
                     role = os.identity().roles().update(role.toBuilder().name(AttributeUtil.getAsStringValue(attribute)).build());
                 }
             }
@@ -138,10 +146,9 @@ public class RoleProcessing extends ObjectProcessing {
 
                 OSClient.OSClientV3 os = authenticate(getConfiguration());
                 Role role = os.identity().roles().get(uid.getUidValue());
-
                 convertRoleToConnectorObject(role, handler);
 
-            } else if (((EqualsFilter) query).getAttribute().getName().equals(NAME)) {
+            } else if (((EqualsFilter) query).getAttribute().getName().equals(Name.NAME)) {
                 LOG.info("((EqualsFilter) query).getAttribute().equals(\"name\")");
 
                 List<Object> allValues = ((EqualsFilter) query).getAttribute().getValue();
@@ -187,12 +194,14 @@ public class RoleProcessing extends ObjectProcessing {
                 builder.setUid(new Uid(String.valueOf(role.getId())));
             }
             if (role.getName() != null) {
-                builder.addAttribute(NAME, role.getName());
+               // builder.addAttribute(Name.NAME, role.getName());
                 builder.setName(role.getName());
             }
-
             if (role.getDomainId() != null) {
                 builder.addAttribute(DOMAIN_ID, role.getDomainId());
+            }
+            if (role.getLinks() != null) {
+                builder.addAttribute(LINKS, role.getLinks());
             }
 
             ConnectorObject connectorObject = builder.build();

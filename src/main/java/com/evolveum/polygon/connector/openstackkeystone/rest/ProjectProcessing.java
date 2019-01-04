@@ -25,6 +25,8 @@ public class ProjectProcessing extends ObjectProcessing {
     private static final String PARENT_ID = "parent_id";
     private static final String PROJECT_NAME = "Project";
 
+    private static final String LINKS = "links";
+
     public ProjectProcessing(OpenStackConnectorConfiguration configuration) {
         super(configuration);
     }
@@ -35,10 +37,10 @@ public class ProjectProcessing extends ObjectProcessing {
 
         projectObjClassBuilder.setType(PROJECT_NAME);
 
-
-        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
-        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
-        projectObjClassBuilder.addAttributeInfo(attrName.build());
+//
+//        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
+//        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
+//        projectObjClassBuilder.addAttributeInfo(attrName.build());
 
         AttributeInfoBuilder attrDescription = new AttributeInfoBuilder(DESCRIPTION);
         attrDescription.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
@@ -52,11 +54,15 @@ public class ProjectProcessing extends ObjectProcessing {
         attrEnabled.setRequired(false).setType(Boolean.class).setCreateable(true).setUpdateable(true).setReadable(true);
         projectObjClassBuilder.addAttributeInfo(attrEnabled.build());
 
-        //parent_id is immutable
+        //immutable
         AttributeInfoBuilder attrParentId = new AttributeInfoBuilder(PARENT_ID);
         attrParentId.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(false).setReadable(true);
         projectObjClassBuilder.addAttributeInfo(attrParentId.build());
 
+        //read-only && multi-valued
+        AttributeInfoBuilder attrLinks = new AttributeInfoBuilder(LINKS);
+        attrLinks.setRequired(false).setType(String.class).setCreateable(false).setUpdateable(false).setReadable(true).setMultiValued(true);
+        projectObjClassBuilder.addAttributeInfo(attrLinks.build());
 
         schemaBuilder.defineObjectClass(projectObjClassBuilder.build());
 
@@ -76,7 +82,7 @@ public class ProjectProcessing extends ObjectProcessing {
         boolean set_required_attribute_name = false;
 
         for (Attribute attribute : attributes) {
-            if (attribute.getName().equals(NAME)) {
+            if (attribute.getName().equals(Name.NAME)) {
                 String userName = AttributeUtil.getAsStringValue(attribute);
                 if (!StringUtil.isBlank(userName)) {
                     project.toBuilder().name(userName);
@@ -96,6 +102,7 @@ public class ProjectProcessing extends ObjectProcessing {
             if (attribute.getName().equals(PARENT_ID)) {
                 project.toBuilder().parentId(AttributeUtil.getAsStringValue(attribute));
             }
+
         }
 
         //project name is not set or is empty
@@ -139,7 +146,7 @@ public class ProjectProcessing extends ObjectProcessing {
                 if (attribute.getName().equals(ENABLED)) {
                     project = os.identity().projects().update(project.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute)).build());
                 }
-                if (attribute.getName().equals(NAME)) {
+                if (attribute.getName().equals(Name.NAME)) {
                     project = os.identity().projects().update(project.toBuilder().name(AttributeUtil.getAsStringValue(attribute)).build());
                 }
                 if (attribute.getName().equals(DESCRIPTION)) {
@@ -167,7 +174,7 @@ public class ProjectProcessing extends ObjectProcessing {
                 Project project = os.identity().projects().get(uid.getUidValue());
                 convertProjectToConnectorObject(project, handler);
 
-            } else if (((EqualsFilter) query).getAttribute().getName().equals(NAME)) {
+            } else if (((EqualsFilter) query).getAttribute().getName().equals(Name.NAME)) {
                 LOG.info("((EqualsFilter) query).getAttribute().equals(\"name\")");
 
                 List<Object> allValues = ((EqualsFilter) query).getAttribute().getValue();
@@ -212,7 +219,7 @@ public class ProjectProcessing extends ObjectProcessing {
                 builder.setUid(new Uid(String.valueOf(project.getId())));
             }
             if (project.getName() != null) {
-                builder.addAttribute(NAME, project.getName());
+               // builder.addAttribute(NAME, project.getName());
                 builder.setName(project.getName());
             }
             if (project.getDescription() != null) {
@@ -221,11 +228,16 @@ public class ProjectProcessing extends ObjectProcessing {
             if (project.getDomainId() != null) {
                 builder.addAttribute(DOMAIN_ID, project.getDomainId());
             }
-
+            if (project.getParentId() != null) {
+                builder.addAttribute(PARENT_ID, project.getParentId());
+            }
             if (project.isEnabled()) {
                 builder.addAttribute(ENABLED, true);
             } else {
                 builder.addAttribute(ENABLED, false);
+            }
+            if (project.getLinks() != null) {
+                builder.addAttribute(LINKS, project.getLinks());
             }
 
             ConnectorObject connectorObject = builder.build();

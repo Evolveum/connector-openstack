@@ -26,6 +26,9 @@ public class DomainProcessing extends ObjectProcessing {
     private static final String DESCRIPTION = "description";
     private static final String ENABLED = "enabled";
 
+    private static final String LINKS = "links";
+
+
 
     public void buildDomainObjectClass(SchemaBuilder schemaBuilder) {
 
@@ -33,9 +36,9 @@ public class DomainProcessing extends ObjectProcessing {
 
         domainObjectClass.setType(DOMAIN_NAME);
 
-        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
-        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
-        domainObjectClass.addAttributeInfo(attrName.build());
+//        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
+//        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
+//        domainObjectClass.addAttributeInfo(attrName.build());
 
 
         AttributeInfoBuilder attrDescription = new AttributeInfoBuilder(DESCRIPTION);
@@ -47,6 +50,12 @@ public class DomainProcessing extends ObjectProcessing {
         domainObjectClass.addAttributeInfo(attrMembers.build());
 
         schemaBuilder.defineObjectClass(domainObjectClass.build());
+
+        //read-only && multi-valued
+        AttributeInfoBuilder attrLinks = new AttributeInfoBuilder(LINKS);
+        attrLinks.setRequired(false).setType(String.class).setCreateable(false).setUpdateable(false).setReadable(true).setMultiValued(true);
+        domainObjectClass.addAttributeInfo(attrLinks.build());
+
 
     }
 
@@ -61,7 +70,7 @@ public class DomainProcessing extends ObjectProcessing {
         boolean set_required_attribute_name = false;
 
         for (Attribute attribute : attributes) {
-            if (attribute.getName().equals(NAME)) {
+            if (attribute.getName().equals(Name.NAME)) {
                 String domainName = AttributeUtil.getAsStringValue(attribute);
                 if (!StringUtil.isBlank(domainName)) {
                     domain.toBuilder().name(domainName);
@@ -117,7 +126,7 @@ public class DomainProcessing extends ObjectProcessing {
                 if (attribute.getName().equals(ENABLED)) {
                     domain = os.identity().domains().update(domain.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute)).build());
                 }
-                if (attribute.getName().equals(NAME)) {
+                if (attribute.getName().equals(Name.NAME)) {
                     domain = os.identity().domains().update(domain.toBuilder().name(AttributeUtil.getAsStringValue(attribute)).build());
                 }
                 if (attribute.getName().equals(DESCRIPTION)) {
@@ -125,7 +134,6 @@ public class DomainProcessing extends ObjectProcessing {
                 }
             }
         } else throw new UnknownUidException("Returned Domain object is null");
-
 
     }
 
@@ -146,7 +154,7 @@ public class DomainProcessing extends ObjectProcessing {
                 Domain domain = os.identity().domains().get(uid.getUidValue());
                 convertDomainToConnectorObject(domain, handler);
 
-            } else if (((EqualsFilter) query).getAttribute().getName().equals(NAME)) {
+            } else if (((EqualsFilter) query).getAttribute().getName().equals(Name.NAME)) {
                 LOG.info("((EqualsFilter) query).getAttribute().equals(\"name\")");
 
                 List<Object> allValues = ((EqualsFilter) query).getAttribute().getValue();
@@ -191,7 +199,7 @@ public class DomainProcessing extends ObjectProcessing {
                 builder.setUid(new Uid(String.valueOf(domain.getId())));
             }
             if (domain.getName() != null) {
-                builder.addAttribute(NAME, domain.getName());
+                builder.addAttribute(Name.NAME, domain.getName());
                 builder.setName(domain.getName());
             }
             if (domain.getDescription() != null) {
@@ -201,6 +209,9 @@ public class DomainProcessing extends ObjectProcessing {
                 builder.addAttribute(ENABLED, true);
             } else {
                 builder.addAttribute(ENABLED, false);
+            }
+            if (domain.getLinks() != null) {
+                builder.addAttribute(LINKS, domain.getLinks());
             }
 
             ConnectorObject connectorObject = builder.build();

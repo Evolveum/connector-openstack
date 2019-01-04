@@ -35,6 +35,8 @@ public class UserProcessing extends ObjectProcessing {
 
     private static final String USERGROUPS = "usergroups";
 
+    private static final String LINKS = "links";
+
 
     //The user ID
     private static final String ID = "id";
@@ -50,9 +52,9 @@ public class UserProcessing extends ObjectProcessing {
 
         userObjClassBuilder.setType(ObjectClass.ACCOUNT_NAME);
 
-        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
-        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
-        userObjClassBuilder.addAttributeInfo(attrName.build());
+//        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
+//        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
+//        userObjClassBuilder.addAttributeInfo(attrName.build());
 
         AttributeInfoBuilder attrDefault_project_id = new AttributeInfoBuilder(DEFAULT_PROJECT_ID);
         attrDefault_project_id.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
@@ -78,6 +80,10 @@ public class UserProcessing extends ObjectProcessing {
         attrDescription.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
         userObjClassBuilder.addAttributeInfo(attrDescription.build());
 
+        //read-only && multi-valued
+        AttributeInfoBuilder attrLinks = new AttributeInfoBuilder(LINKS);
+        attrLinks.setRequired(false).setType(String.class).setCreateable(false).setUpdateable(false).setReadable(true).setMultiValued(true);
+        userObjClassBuilder.addAttributeInfo(attrLinks.build());
 
         AttributeInfoBuilder attrUserInGroups = new AttributeInfoBuilder(USERGROUPS);
         attrUserInGroups.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
@@ -100,7 +106,7 @@ public class UserProcessing extends ObjectProcessing {
         boolean set_required_attribute_name = false;
 
         for (Attribute attribute : attributes) {
-            if (attribute.getName().equals(NAME)) {
+            if (attribute.getName().equals(Name.NAME)) {
                 String userName = AttributeUtil.getAsStringValue(attribute);
                 if (!StringUtil.isBlank(userName)) {
                     user.toBuilder().name(userName);
@@ -169,7 +175,7 @@ public class UserProcessing extends ObjectProcessing {
                 if (attribute.getName().equals(ENABLED)) {
                     user = os.identity().users().update(user.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute)).build());
                 }
-                if (attribute.getName().equals(NAME)) {
+                if (attribute.getName().equals(Name.NAME)) {
                     user = os.identity().users().update(user.toBuilder().name(AttributeUtil.getAsStringValue(attribute)).build());
                 }
                 if (attribute.getName().equals(PASSWORD)) {
@@ -203,7 +209,7 @@ public class UserProcessing extends ObjectProcessing {
                 List<? extends Group> listUserGroups = os.identity().users().listUserGroups(uid.getUidValue());
                 convertUserToConnectorObject(user, handler, listUserGroups);
 
-            } else if (((EqualsFilter) query).getAttribute().getName().equals(NAME)) {
+            } else if (((EqualsFilter) query).getAttribute().getName().equals(Name.NAME)) {
                 LOG.info("((EqualsFilter) query).getAttribute().equals(\"name\")");
 
                 List<Object> allValues = ((EqualsFilter) query).getAttribute().getValue();
@@ -251,7 +257,7 @@ public class UserProcessing extends ObjectProcessing {
                 builder.setUid(new Uid(String.valueOf(user.getId())));
             }
             if (user.getName() != null) {
-                builder.addAttribute(NAME, user.getName());
+              //  builder.addAttribute(NAME, user.getName());
                 builder.setName(user.getName());
             }
             if (user.getDefaultProjectId() != null) {
@@ -273,6 +279,9 @@ public class UserProcessing extends ObjectProcessing {
                 builder.addAttribute(ENABLED, true);
             } else {
                 builder.addAttribute(ENABLED, false);
+            }
+            if (user.getLinks() != null) {
+                builder.addAttribute(LINKS, user.getLinks());
             }
 
             if (listUserGroups != null) {

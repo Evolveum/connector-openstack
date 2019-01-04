@@ -22,9 +22,10 @@ public class GroupProcessing extends ObjectProcessing {
     //optional
     private static final String DESCRIPTION = "description";
     private static final String DOMAIN_ID = "domain_id";
+    private static final String LINKS = "links";
 
 
-    private static final String ID = "id";
+    //private static final String ID = "id";
     private static final String GROUP_MEMBERS = "group_members";
 
 
@@ -38,9 +39,9 @@ public class GroupProcessing extends ObjectProcessing {
 
         groupObjClassBuilder.setType(ObjectClass.GROUP_NAME);
 
-        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
-        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
-        groupObjClassBuilder.addAttributeInfo(attrName.build());
+//        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
+//        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
+//        groupObjClassBuilder.addAttributeInfo(attrName.build());
 
         AttributeInfoBuilder attrDomain_id = new AttributeInfoBuilder(DOMAIN_ID);
         attrDomain_id.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
@@ -53,6 +54,11 @@ public class GroupProcessing extends ObjectProcessing {
         AttributeInfoBuilder attrMembers = new AttributeInfoBuilder(GROUP_MEMBERS);
         attrMembers.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
         groupObjClassBuilder.addAttributeInfo(attrMembers.build());
+
+        //read-only && multi-valued
+        AttributeInfoBuilder attrLinks = new AttributeInfoBuilder(LINKS);
+        attrLinks.setRequired(false).setType(String.class).setCreateable(false).setUpdateable(false).setReadable(true).setMultiValued(true);
+        groupObjClassBuilder.addAttributeInfo(attrLinks.build());
 
 
         schemaBuilder.defineObjectClass(groupObjClassBuilder.build());
@@ -71,7 +77,7 @@ public class GroupProcessing extends ObjectProcessing {
         boolean set_required_attribute_name = false;
 
         for (Attribute attribute : attributes) {
-            if (attribute.getName().equals(NAME)) {
+            if (attribute.getName().equals(Name.NAME)) {
                 String groupName = AttributeUtil.getAsStringValue(attribute);
                 if (!StringUtil.isBlank(groupName)) {
                     group.toBuilder().name(groupName);
@@ -120,15 +126,15 @@ public class GroupProcessing extends ObjectProcessing {
         LOG.info("Group is : {0}", group);
         if (group != null) {
             for (Attribute attribute : attributes) {
-                if (attribute.getName().equals("domain_id")) {
+                if (attribute.getName().equals(DOMAIN_ID)) {
                     group = os.identity().groups().update(group.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute)).build());
                 }
 
-                if (attribute.getName().equals("name")) {
+                if (attribute.getName().equals(Name.NAME)) {
                     group = os.identity().groups().update(group.toBuilder().name(AttributeUtil.getAsStringValue(attribute)).build());
                 }
 
-                if (attribute.getName().equals("description")) {
+                if (attribute.getName().equals(DESCRIPTION)) {
                     group = os.identity().groups().update(group.toBuilder().description(AttributeUtil.getAsStringValue(attribute)).build());
                 }
 //                if (attribute.getName().equals(GROUP_MEMBERS)) {
@@ -171,7 +177,7 @@ public class GroupProcessing extends ObjectProcessing {
                 List<? extends User> listGroupUsers = os.identity().groups().listGroupUsers(uid.getUidValue());
                 convertGroupToConnectorObject(group, handler, listGroupUsers);
 
-            } else if (((EqualsFilter) query).getAttribute().getName().equals(NAME)) {
+            } else if (((EqualsFilter) query).getAttribute().getName().equals(Name.NAME)) {
                 LOG.info("((EqualsFilter) query).getAttribute().equals(\"name\")");
 
                 List<Object> allValues = ((EqualsFilter) query).getAttribute().getValue();
@@ -181,7 +187,6 @@ public class GroupProcessing extends ObjectProcessing {
 
                 String attributeValue = allValues.get(0).toString();
                 LOG.info("Attribute value is: {0}", attributeValue);
-
                 OSClientV3 os = authenticate(getConfiguration());
                 List<? extends Group> groups = os.identity().groups().getByName(attributeValue);
                 for (Group group : groups) {
@@ -218,15 +223,17 @@ public class GroupProcessing extends ObjectProcessing {
                 builder.setUid(new Uid(String.valueOf(group.getId())));
             }
             if (group.getName() != null) {
-                builder.addAttribute(NAME, group.getName());
+               // builder.addAttribute(NAME, group.getName());
                 builder.setName(group.getName());
             }
-
             if (group.getDescription() != null) {
                 builder.addAttribute(DESCRIPTION, group.getDescription());
             }
             if (group.getDomainId() != null) {
                 builder.addAttribute(DOMAIN_ID, group.getDomainId());
+            }
+            if (group.getLinks() != null) {
+                builder.addAttribute(LINKS, group.getLinks());
             }
 
             if (listGroupUsers != null) {

@@ -30,7 +30,7 @@ public class DeleteActionTests extends BasicConfigurationForTests {
         OperationOptions options = new OperationOptions(new HashMap<String,Object>());
 
         Set<Attribute> attributesCreatedGroup = new HashSet<Attribute>();
-        attributesCreatedGroup.add(AttributeBuilder.build("name", "Timon"));
+        attributesCreatedGroup.add(AttributeBuilder.build("__NAME__", "Timon"));
         attributesCreatedGroup.add(AttributeBuilder.build("description","Pumbaa"));
 
         ObjectClass objectClassGroup = ObjectClass.GROUP;
@@ -76,7 +76,7 @@ public class DeleteActionTests extends BasicConfigurationForTests {
         OperationOptions options = new OperationOptions(new HashMap<String,Object>());
 
         Set<Attribute> attributesCreatedProject = new HashSet<Attribute>();
-        attributesCreatedProject.add(AttributeBuilder.build("name", "Zazu"));
+        attributesCreatedProject.add(AttributeBuilder.build("__NAME__", "Zazu"));
         attributesCreatedProject.add(AttributeBuilder.build("description","Cartoon"));
 
         ObjectClass objectClassProject = new ObjectClass("Project");
@@ -123,7 +123,7 @@ public class DeleteActionTests extends BasicConfigurationForTests {
         OperationOptions options = new OperationOptions(new HashMap<String,Object>());
 
         Set<Attribute> attributesCreatedDomain = new HashSet<Attribute>();
-        attributesCreatedDomain.add(AttributeBuilder.build("name", "Rafiki"));
+        attributesCreatedDomain.add(AttributeBuilder.build("__NAME__", "Rafiki"));
         attributesCreatedDomain.add(AttributeBuilder.build("description","Cartoon"));
 
         ObjectClass objectClassDomain = new ObjectClass("Domain");
@@ -169,7 +169,7 @@ public class DeleteActionTests extends BasicConfigurationForTests {
         OperationOptions options = new OperationOptions(new HashMap<String,Object>());
 
         Set<Attribute> attributesCreatedRole = new HashSet<Attribute>();
-        attributesCreatedRole.add(AttributeBuilder.build("name", "Shenzi"));
+        attributesCreatedRole.add(AttributeBuilder.build("__NAME__", "Shenzi"));
         attributesCreatedRole.add(AttributeBuilder.build("description","Cartoon"));
 
         ObjectClass objectClassRole = new ObjectClass("Role");
@@ -215,7 +215,7 @@ public class DeleteActionTests extends BasicConfigurationForTests {
         OperationOptions options = new OperationOptions(new HashMap<String,Object>());
 
         Set<Attribute> attributesCreatedUser = new HashSet<Attribute>();
-        attributesCreatedUser.add(AttributeBuilder.build("name", "Banzai"));
+        attributesCreatedUser.add(AttributeBuilder.build("__NAME__", "Banzai"));
         attributesCreatedUser.add(AttributeBuilder.build("description","Cartoon"));
         attributesCreatedUser.add(AttributeBuilder.build("enabled", true));
         attributesCreatedUser.add(AttributeBuilder.build("password", "LionKing99"));

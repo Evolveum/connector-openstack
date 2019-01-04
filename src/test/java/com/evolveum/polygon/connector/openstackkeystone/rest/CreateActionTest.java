@@ -66,7 +66,7 @@ public class CreateActionTest extends BasicConfigurationForTests {
         OperationOptions options = new OperationOptions(new HashMap<String,Object>());
 
         Set<Attribute> attributesAccount = new HashSet<>();
-        attributesAccount.add(AttributeBuilder.build("name","Simba"));
+        attributesAccount.add(AttributeBuilder.build("__NAME__","Simba"));
 
 
         ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
