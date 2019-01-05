@@ -21,7 +21,7 @@ public class RoleProcessing extends ObjectProcessing {
     private static final String NAME = "name";
 
     //optional
-    private static final String DESCRIPTION = "description";
+    private static final String DESCRIPTION = "description"; //not supported in openstack4j api
     private static final String DOMAIN_ID = "domain_id";
 
     private static final String ROLE_NAME = "Role";
@@ -47,7 +47,7 @@ public class RoleProcessing extends ObjectProcessing {
         attrDomain_id.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
         roleObjClassBuilder.addAttributeInfo(attrDomain_id.build());
 
-        //not implemented in api... but still exist (http://developer.openstack.org/api-ref-identity-v3.html#roles-v3)
+        //not implemented in openstack4j api... but still exist (http://developer.openstack.org/api-ref-identity-v3.html#roles-v3)
 //        AttributeInfoBuilder attrDescription = new AttributeInfoBuilder(DESCRIPTION);
 //        attrDescription.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
 //        roleObjClassBuilder.addAttributeInfo(attrDescription.build());
@@ -148,7 +148,7 @@ public class RoleProcessing extends ObjectProcessing {
                 Role role = os.identity().roles().get(uid.getUidValue());
                 convertRoleToConnectorObject(role, handler);
 
-            } else if (((EqualsFilter) query).getAttribute().getName().equals(Name.NAME)) {
+            } else if (((EqualsFilter) query).getAttribute() instanceof Name) {
                 LOG.info("((EqualsFilter) query).getAttribute().equals(\"name\")");
 
                 List<Object> allValues = ((EqualsFilter) query).getAttribute().getValue();
@@ -161,6 +161,7 @@ public class RoleProcessing extends ObjectProcessing {
 
                 OSClient.OSClientV3 os = authenticate(getConfiguration());
                 List<? extends Role> roles = os.identity().roles().getByName(attributeValue);
+                LOG.info("{0}", roles);
                 for (Role role : roles) {
                     convertRoleToConnectorObject(role, handler);
                 }

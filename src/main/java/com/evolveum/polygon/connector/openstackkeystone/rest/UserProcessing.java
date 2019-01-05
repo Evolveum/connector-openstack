@@ -221,8 +221,8 @@ public class UserProcessing extends ObjectProcessing {
                 List<? extends Group> listUserGroups = os.identity().users().listUserGroups(uid.getUidValue());
                 convertUserToConnectorObject(user, handler, listUserGroups);
 
-            } else if (((EqualsFilter) query).getAttribute().getName().equals(Name.NAME)) {
-                LOG.info("((EqualsFilter) query).getAttribute().equals(\"name\")");
+            } else if (((EqualsFilter) query).getAttribute() instanceof Name) {
+                LOG.info("(((EqualsFilter) query).getAttribute() instanceof Name)");
 
                 List<Object> allValues = ((EqualsFilter) query).getAttribute().getValue();
                 if (allValues == null || allValues.get(0) == null) {

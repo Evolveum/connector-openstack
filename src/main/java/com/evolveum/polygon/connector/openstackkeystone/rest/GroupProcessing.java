@@ -177,7 +177,7 @@ public class GroupProcessing extends ObjectProcessing {
                 List<? extends User> listGroupUsers = os.identity().groups().listGroupUsers(uid.getUidValue());
                 convertGroupToConnectorObject(group, handler, listGroupUsers);
 
-            } else if (((EqualsFilter) query).getAttribute().getName().equals(Name.NAME)) {
+            } else if (((EqualsFilter) query).getAttribute() instanceof Name) {
                 LOG.info("((EqualsFilter) query).getAttribute().equals(\"name\")");
 
                 List<Object> allValues = ((EqualsFilter) query).getAttribute().getValue();

@@ -174,7 +174,7 @@ public class ProjectProcessing extends ObjectProcessing {
                 Project project = os.identity().projects().get(uid.getUidValue());
                 convertProjectToConnectorObject(project, handler);
 
-            } else if (((EqualsFilter) query).getAttribute().getName().equals(Name.NAME)) {
+            } else if (((EqualsFilter) query).getAttribute() instanceof Name) {
                 LOG.info("((EqualsFilter) query).getAttribute().equals(\"name\")");
 
                 List<Object> allValues = ((EqualsFilter) query).getAttribute().getValue();
