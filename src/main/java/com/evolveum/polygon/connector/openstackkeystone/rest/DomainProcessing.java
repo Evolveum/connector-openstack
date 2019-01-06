@@ -29,7 +29,6 @@ public class DomainProcessing extends ObjectProcessing {
     private static final String LINKS = "links";
 
 
-
     public void buildDomainObjectClass(SchemaBuilder schemaBuilder) {
 
         ObjectClassInfoBuilder domainObjectClass = new ObjectClassInfoBuilder();

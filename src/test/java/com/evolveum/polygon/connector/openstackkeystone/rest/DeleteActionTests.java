@@ -8,10 +8,7 @@ import org.identityconnectors.framework.common.objects.filter.AttributeFilter;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.FilterBuilder;
 import org.identityconnectors.framework.spi.SearchResultsHandler;
-import org.openstack4j.api.exceptions.ClientResponseException;
 import org.testng.annotations.Test;
-
-import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,16 +20,16 @@ import java.util.concurrent.TimeUnit;
 public class DeleteActionTests extends BasicConfigurationForTests {
 
     @Test(expectedExceptions = UnknownUidException.class)
-    public void deleteGroupTest(){
+    public void deleteGroupTest() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         openStackConnector.init(conf);
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Set<Attribute> attributesCreatedGroup = new HashSet<Attribute>();
         attributesCreatedGroup.add(AttributeBuilder.build("__NAME__", "Timon"));
-        attributesCreatedGroup.add(AttributeBuilder.build("description","Pumbaa"));
+        attributesCreatedGroup.add(AttributeBuilder.build("description", "Pumbaa"));
 
         ObjectClass objectClassGroup = ObjectClass.GROUP;
 
@@ -69,16 +66,16 @@ public class DeleteActionTests extends BasicConfigurationForTests {
     }
 
     @Test(expectedExceptions = UnknownUidException.class)
-    public void deleteProjectTest(){
+    public void deleteProjectTest() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         openStackConnector.init(conf);
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Set<Attribute> attributesCreatedProject = new HashSet<Attribute>();
         attributesCreatedProject.add(AttributeBuilder.build("__NAME__", "Zazu"));
-        attributesCreatedProject.add(AttributeBuilder.build("description","Cartoon"));
+        attributesCreatedProject.add(AttributeBuilder.build("description", "Cartoon"));
 
         ObjectClass objectClassProject = new ObjectClass("Project");
 
@@ -116,16 +113,16 @@ public class DeleteActionTests extends BasicConfigurationForTests {
 
 
     @Test(expectedExceptions = UnknownUidException.class)
-    public void deleteDomainTest(){
+    public void deleteDomainTest() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         openStackConnector.init(conf);
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Set<Attribute> attributesCreatedDomain = new HashSet<Attribute>();
         attributesCreatedDomain.add(AttributeBuilder.build("__NAME__", "Rafiki"));
-        attributesCreatedDomain.add(AttributeBuilder.build("description","Cartoon"));
+        attributesCreatedDomain.add(AttributeBuilder.build("description", "Cartoon"));
 
         ObjectClass objectClassDomain = new ObjectClass("Domain");
 
@@ -162,16 +159,16 @@ public class DeleteActionTests extends BasicConfigurationForTests {
     }
 
     @Test(expectedExceptions = UnknownUidException.class)
-    public void deleteRoleTest(){
+    public void deleteRoleTest() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         openStackConnector.init(conf);
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Set<Attribute> attributesCreatedRole = new HashSet<Attribute>();
         attributesCreatedRole.add(AttributeBuilder.build("__NAME__", "Shenzi"));
-        attributesCreatedRole.add(AttributeBuilder.build("description","Cartoon"));
+        attributesCreatedRole.add(AttributeBuilder.build("description", "Cartoon"));
 
         ObjectClass objectClassRole = new ObjectClass("Role");
 
@@ -208,16 +205,16 @@ public class DeleteActionTests extends BasicConfigurationForTests {
     }
 
     @Test(expectedExceptions = UnknownUidException.class)
-    public void deleteUserTest(){
+    public void deleteUserTest() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         openStackConnector.init(conf);
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Set<Attribute> attributesCreatedUser = new HashSet<Attribute>();
         attributesCreatedUser.add(AttributeBuilder.build("__NAME__", "Banzai"));
-        attributesCreatedUser.add(AttributeBuilder.build("description","Cartoon"));
+        attributesCreatedUser.add(AttributeBuilder.build("description", "Cartoon"));
         attributesCreatedUser.add(AttributeBuilder.build("enabled", true));
 //        attributesCreatedUser.add(AttributeBuilder.build("password", "LionKing99"));
         attributesCreatedUser.add(AttributeBuilder.build("domain_id", "default"));
@@ -225,7 +222,7 @@ public class DeleteActionTests extends BasicConfigurationForTests {
         attributesCreatedUser.add(AttributeBuilder.build("email", "lionking@mail.com"));
 
         GuardedString pass = new GuardedString("LionKing99".toCharArray());
-        attributesCreatedUser.add(AttributeBuilder.build("__PASSWORD__",pass));
+        attributesCreatedUser.add(AttributeBuilder.build("__PASSWORD__", pass));
 
         ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
 

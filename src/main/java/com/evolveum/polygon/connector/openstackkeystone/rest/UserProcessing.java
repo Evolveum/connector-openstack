@@ -4,15 +4,12 @@ package com.evolveum.polygon.connector.openstackkeystone.rest;
 import com.evolveum.polygon.common.GuardedStringAccessor;
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.security.GuardedString;
-import org.identityconnectors.framework.common.exceptions.AlreadyExistsException;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
 import org.identityconnectors.framework.common.exceptions.UnknownUidException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.openstack4j.api.OSClient.OSClientV3;
-import org.openstack4j.api.exceptions.ClientResponseException;
-import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.identity.v3.Group;
 import org.openstack4j.model.identity.v3.User;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneUser;
@@ -269,7 +266,7 @@ public class UserProcessing extends ObjectProcessing {
                 builder.setUid(new Uid(String.valueOf(user.getId())));
             }
             if (user.getName() != null) {
-              //  builder.addAttribute(NAME, user.getName());
+                //  builder.addAttribute(NAME, user.getName());
                 builder.setName(user.getName());
             }
             if (user.getDefaultProjectId() != null) {

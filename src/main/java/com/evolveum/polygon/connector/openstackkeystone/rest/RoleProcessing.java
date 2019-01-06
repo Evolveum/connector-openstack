@@ -10,7 +10,6 @@ import org.openstack4j.api.OSClient;
 import org.openstack4j.model.identity.v3.Role;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneRole;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -128,7 +127,7 @@ public class RoleProcessing extends ObjectProcessing {
                     role = os.identity().roles().update(role.toBuilder().name(AttributeUtil.getAsStringValue(attribute)).build());
                 }
             }
-        }  else throw new UnknownUidException("Returned Role object is null");
+        } else throw new UnknownUidException("Returned Role object is null");
     }
 
     public void executeQueryForRole(Filter query, ResultsHandler handler, OperationOptions options) {
@@ -195,7 +194,7 @@ public class RoleProcessing extends ObjectProcessing {
                 builder.setUid(new Uid(String.valueOf(role.getId())));
             }
             if (role.getName() != null) {
-               // builder.addAttribute(Name.NAME, role.getName());
+                // builder.addAttribute(Name.NAME, role.getName());
                 builder.setName(role.getName());
             }
             if (role.getDomainId() != null) {

@@ -1,10 +1,10 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
+import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
 import org.identityconnectors.framework.common.objects.*;
 import org.openstack4j.api.exceptions.ClientResponseException;
 import org.testng.annotations.Test;
 
-import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,16 +12,16 @@ import java.util.Set;
 public class CreateActionTest extends BasicConfigurationForTests {
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
-    public void creteTestNotSupportedObjectClass(){
+    public void creteTestNotSupportedObjectClass() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         openStackConnector.init(conf);
 
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Set<Attribute> attributesAccount = new HashSet<>();
-        attributesAccount.add(AttributeBuilder.build("email","lion_the_king_of_jungle@cat.com"));
+        attributesAccount.add(AttributeBuilder.build("email", "lion_the_king_of_jungle@cat.com"));
 
 
         ObjectClass objectClassAccount = new ObjectClass("Animal");
@@ -34,16 +34,16 @@ public class CreateActionTest extends BasicConfigurationForTests {
     }
 
     @Test(expectedExceptions = InvalidAttributeValueException.class)
-    public void creteTestWithNotFilledMandatoryAttributeForAccount(){
+    public void creteTestWithNotFilledMandatoryAttributeForAccount() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         openStackConnector.init(conf);
 
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Set<Attribute> attributesAccount = new HashSet<>();
-        attributesAccount.add(AttributeBuilder.build("email","lion_the_king_of_jungle@cat.com"));
+        attributesAccount.add(AttributeBuilder.build("email", "lion_the_king_of_jungle@cat.com"));
 
 
         ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
@@ -56,17 +56,17 @@ public class CreateActionTest extends BasicConfigurationForTests {
     }
 
     //TODO AlreadyExistsException ?
-    @Test(expectedExceptions = ClientResponseException.class )
-    public void creteTestUserWithExistingLoginName(){
+    @Test(expectedExceptions = ClientResponseException.class)
+    public void creteTestUserWithExistingLoginName() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         openStackConnector.init(conf);
 
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Set<Attribute> attributesAccount = new HashSet<>();
-        attributesAccount.add(AttributeBuilder.build("__NAME__","Simba"));
+        attributesAccount.add(AttributeBuilder.build("__NAME__", "Simba"));
 
 
         ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
@@ -81,16 +81,16 @@ public class CreateActionTest extends BasicConfigurationForTests {
     }
 
     @Test(expectedExceptions = InvalidAttributeValueException.class)
-    public void creteTestWithNotFilledMandatoryAttributeForGroup(){
+    public void creteTestWithNotFilledMandatoryAttributeForGroup() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         openStackConnector.init(conf);
 
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Set<Attribute> attributesGroup = new HashSet<>();
-        attributesGroup.add(AttributeBuilder.build("description","Timon and Pumbaa"));
+        attributesGroup.add(AttributeBuilder.build("description", "Timon and Pumbaa"));
 
         ObjectClass objectClassGroup = ObjectClass.GROUP;
 
@@ -102,16 +102,16 @@ public class CreateActionTest extends BasicConfigurationForTests {
     }
 
     @Test(expectedExceptions = InvalidAttributeValueException.class)
-    public void creteTestWithNotFilledMandatoryAttributeForProject(){
+    public void creteTestWithNotFilledMandatoryAttributeForProject() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         openStackConnector.init(conf);
 
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Set<Attribute> attributesGroup = new HashSet<>();
-        attributesGroup.add(AttributeBuilder.build("description","Nala"));
+        attributesGroup.add(AttributeBuilder.build("description", "Nala"));
 
         ObjectClass objectClassGroup = new ObjectClass("Project");
 
@@ -123,16 +123,16 @@ public class CreateActionTest extends BasicConfigurationForTests {
     }
 
     @Test(expectedExceptions = InvalidAttributeValueException.class)
-    public void creteTestWithNotFilledMandatoryAttributeForDomain(){
+    public void creteTestWithNotFilledMandatoryAttributeForDomain() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         openStackConnector.init(conf);
 
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Set<Attribute> attributesGroup = new HashSet<>();
-        attributesGroup.add(AttributeBuilder.build("description","Mufasa"));
+        attributesGroup.add(AttributeBuilder.build("description", "Mufasa"));
 
         ObjectClass objectClassGroup = new ObjectClass("Domain");
 
@@ -144,16 +144,16 @@ public class CreateActionTest extends BasicConfigurationForTests {
     }
 
     @Test(expectedExceptions = InvalidAttributeValueException.class)
-    public void creteTestWithNotFilledMandatoryAttributeForRole(){
+    public void creteTestWithNotFilledMandatoryAttributeForRole() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         openStackConnector.init(conf);
 
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Set<Attribute> attributesGroup = new HashSet<>();
-        attributesGroup.add(AttributeBuilder.build("description","Scar"));
+        attributesGroup.add(AttributeBuilder.build("description", "Scar"));
 
         ObjectClass objectClassGroup = new ObjectClass("Role");
 
@@ -163,7 +163,6 @@ public class CreateActionTest extends BasicConfigurationForTests {
             openStackConnector.dispose();
         }
     }
-
 
 
 }

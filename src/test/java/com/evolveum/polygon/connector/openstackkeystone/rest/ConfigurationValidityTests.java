@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 public class ConfigurationValidityTests extends BasicConfigurationForTests {
 
     @Test(expectedExceptions = ConfigurationException.class)
-    public void creteTestConfigurationMandatoryValueMissing(){
+    public void creteTestConfigurationMandatoryValueMissing() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
         OpenStackConnectorConfiguration conf = getConfiguration();
 
@@ -22,7 +22,7 @@ public class ConfigurationValidityTests extends BasicConfigurationForTests {
 
 
     @Test(expectedExceptions = ConfigurationException.class)
-    public void creteTestConfigurationSecretValueMissing(){
+    public void creteTestConfigurationSecretValueMissing() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration conf = getConfiguration();

@@ -4,7 +4,6 @@ package com.evolveum.polygon.connector.openstackkeystone.rest;
 import com.evolveum.polygon.common.GuardedStringAccessor;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.common.security.GuardedString;
-import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.common.Identifier;
 import org.openstack4j.openstack.OSFactory;

@@ -219,7 +219,7 @@ public class ProjectProcessing extends ObjectProcessing {
                 builder.setUid(new Uid(String.valueOf(project.getId())));
             }
             if (project.getName() != null) {
-               // builder.addAttribute(NAME, project.getName());
+                // builder.addAttribute(NAME, project.getName());
                 builder.setName(project.getName());
             }
             if (project.getDescription() != null) {

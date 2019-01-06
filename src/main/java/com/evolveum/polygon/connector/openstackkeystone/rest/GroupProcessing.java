@@ -2,6 +2,7 @@ package com.evolveum.polygon.connector.openstackkeystone.rest;
 
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
+import org.identityconnectors.framework.common.exceptions.UnknownUidException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
@@ -9,7 +10,7 @@ import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.identity.v3.Group;
 import org.openstack4j.model.identity.v3.User;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneGroup;
-import org.identityconnectors.framework.common.exceptions.UnknownUidException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -214,7 +215,7 @@ public class GroupProcessing extends ObjectProcessing {
     }
 
     public void convertGroupToConnectorObject(Group group, ResultsHandler handler, List<? extends User> listGroupUsers) {
-        LOG.info("convertGroupToConnectorObject, group: {0}, handler {1}", group, handler);
+        LOG.info("convertGroupToConnectorObject, group: {0}, handler {1}, listGroupUser {2} ", group, handler, listGroupUsers);
         if (group != null) {
             ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
             builder.setObjectClass(ObjectClass.GROUP);
@@ -223,7 +224,7 @@ public class GroupProcessing extends ObjectProcessing {
                 builder.setUid(new Uid(String.valueOf(group.getId())));
             }
             if (group.getName() != null) {
-               // builder.addAttribute(NAME, group.getName());
+                // builder.addAttribute(NAME, group.getName());
                 builder.setName(group.getName());
             }
             if (group.getDescription() != null) {

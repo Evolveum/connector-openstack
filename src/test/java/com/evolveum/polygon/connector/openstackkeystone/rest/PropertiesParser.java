@@ -49,7 +49,7 @@ public class PropertiesParser {
     }
 
     public GuardedString getSecret() {
-        return new GuardedString(((String)properties.get(SECRET)).toCharArray());
+        return new GuardedString(((String) properties.get(SECRET)).toCharArray());
     }
 
     public String getProjectName() {

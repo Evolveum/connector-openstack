@@ -34,7 +34,7 @@ public class FilteringTests extends BasicConfigurationForTests {
         attributesFirstCreateAccount.add(AttributeBuilder.build("default_project_id", "project"));
         attributesFirstCreateAccount.add(AttributeBuilder.build("email", "nomail"));
         GuardedString pass = new GuardedString("5tr0ngp4ssw0rd".toCharArray());
-        attributesFirstCreateAccount.add(AttributeBuilder.build("__PASSWORD__",pass));
+        attributesFirstCreateAccount.add(AttributeBuilder.build("__PASSWORD__", pass));
 
         Uid simbaUid = openStackConnector.create(objectClassAccount, attributesFirstCreateAccount, options);
 
@@ -45,7 +45,7 @@ public class FilteringTests extends BasicConfigurationForTests {
         attributesSecondCreateAccount.add(AttributeBuilder.build("__NAME__", "Scar"));
         attributesSecondCreateAccount.add(AttributeBuilder.build("default_project_id", "project"));
         attributesSecondCreateAccount.add(AttributeBuilder.build("email", "nomail"));
-        attributesSecondCreateAccount.add(AttributeBuilder.build("__PASSWORD__",pass));
+        attributesSecondCreateAccount.add(AttributeBuilder.build("__PASSWORD__", pass));
 
         Uid scarUid = openStackConnector.create(objectClassAccount, attributesSecondCreateAccount, options);
 
@@ -328,13 +328,13 @@ public class FilteringTests extends BasicConfigurationForTests {
         ObjectClass objectClassRole = new ObjectClass("Role");
 
         Set<Attribute> attributesFirstCreateRole = new HashSet<Attribute>();
-      //  attributesFirstCreateRole.add(AttributeBuilder.build("description", "The Lion King"));
+        //  attributesFirstCreateRole.add(AttributeBuilder.build("description", "The Lion King"));
         attributesFirstCreateRole.add(AttributeBuilder.build("__NAME__", "Sarabi Role"));
 
         Uid sarabiRoleUid = openStackConnector.create(objectClassRole, attributesFirstCreateRole, options);
 
         Set<Attribute> attributesSecondCreateRole = new HashSet<Attribute>();
-       // attributesSecondCreateRole.add(AttributeBuilder.build("description", "The Lion King"));
+        // attributesSecondCreateRole.add(AttributeBuilder.build("description", "The Lion King"));
         attributesSecondCreateRole.add(AttributeBuilder.build("__NAME__", "Sarafina Role"));
 
         Uid sarafinaRoleUid = openStackConnector.create(objectClassRole, attributesSecondCreateRole, options);

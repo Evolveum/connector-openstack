@@ -1,45 +1,41 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
-import java.util.*;
 
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
-import org.identityconnectors.framework.common.objects.Attribute;
-import org.identityconnectors.framework.common.objects.AttributeBuilder;
-import org.identityconnectors.framework.common.objects.AttributeInfo;
-import org.identityconnectors.framework.common.objects.ConnectorObject;
-import org.identityconnectors.framework.common.objects.ObjectClass;
-import org.identityconnectors.framework.common.objects.OperationOptions;
-import org.identityconnectors.framework.common.objects.Schema;
-import org.identityconnectors.framework.common.objects.SearchResult;
-import org.identityconnectors.framework.common.objects.Uid;
+import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.AttributeFilter;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.FilterBuilder;
 import org.identityconnectors.framework.spi.SearchResultsHandler;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 public class SchemaConsistencyTests extends BasicConfigurationForTests {
 
 
     @Test
-    public void schemaTestGroupObjectClass(){
+    public void schemaTestGroupObjectClass() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration configuration = getConfiguration();
         openStackConnector.init(configuration);
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Schema schema = openStackConnector.schema();
 
         Set<AttributeInfo> attributesInfoGroup = schema.findObjectClassInfo(ObjectClass.GROUP_NAME).getAttributeInfo();
         Set<Attribute> attributesGroup = new HashSet<Attribute>();
 
-        for(AttributeInfo attributeInfo : attributesInfoGroup){
-            if(!attributeInfo.isMultiValued() && attributeInfo.isCreateable() && attributeInfo.isReadable()){
-                if(attributeInfo.getName().equals("domain_id")){
-                    attributesGroup.add(AttributeBuilder.build(attributeInfo.getName(),"default"));
-                } else if(attributeInfo.getType().equals(String.class)){
-                    attributesGroup.add(AttributeBuilder.build(attributeInfo.getName(),"GroupExample"));
+        for (AttributeInfo attributeInfo : attributesInfoGroup) {
+            if (!attributeInfo.isMultiValued() && attributeInfo.isCreateable() && attributeInfo.isReadable()) {
+                if (attributeInfo.getName().equals("domain_id")) {
+                    attributesGroup.add(AttributeBuilder.build(attributeInfo.getName(), "default"));
+                } else if (attributeInfo.getType().equals(String.class)) {
+                    attributesGroup.add(AttributeBuilder.build(attributeInfo.getName(), "GroupExample"));
                 }
             }
         }
@@ -67,7 +63,7 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
         openStackConnector.executeQuery(objectClassGroup, filterGroup, handlerGroup, options);
 
         try {
-            if(!resultsGroup.get(0).getAttributes().containsAll(attributesGroup)){
+            if (!resultsGroup.get(0).getAttributes().containsAll(attributesGroup)) {
                 throw new InvalidAttributeValueException("Attributes of created group and searched group is not same.");
             }
         } finally {
@@ -77,28 +73,28 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
     }
 
     @Test
-    public void schemaTestProjectObjectClass(){
+    public void schemaTestProjectObjectClass() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration configuration = getConfiguration();
         openStackConnector.init(configuration);
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Schema schema = openStackConnector.schema();
 
         Set<AttributeInfo> attributesInfoProject = schema.findObjectClassInfo("Project").getAttributeInfo();
         Set<Attribute> attributesProject = new HashSet<Attribute>();
 
-        for(AttributeInfo attributeInfo : attributesInfoProject){
-            if(!attributeInfo.isMultiValued() && attributeInfo.isCreateable() && attributeInfo.isReadable()){
-                if(attributeInfo.getName().equals("domain_id")){
-                    attributesProject.add(AttributeBuilder.build(attributeInfo.getName(),"default"));
-                } else if(attributeInfo.getName().equals("parent_id")){
-                    attributesProject.add(AttributeBuilder.build(attributeInfo.getName(),"default"));
-                } else if(attributeInfo.getType().equals(String.class)){
-                    attributesProject.add(AttributeBuilder.build(attributeInfo.getName(),"ProjectExample"));
-                }else if(attributeInfo.getType().equals(Boolean.class)){
-                    attributesProject.add(AttributeBuilder.build(attributeInfo.getName(),true));
+        for (AttributeInfo attributeInfo : attributesInfoProject) {
+            if (!attributeInfo.isMultiValued() && attributeInfo.isCreateable() && attributeInfo.isReadable()) {
+                if (attributeInfo.getName().equals("domain_id")) {
+                    attributesProject.add(AttributeBuilder.build(attributeInfo.getName(), "default"));
+                } else if (attributeInfo.getName().equals("parent_id")) {
+                    attributesProject.add(AttributeBuilder.build(attributeInfo.getName(), "default"));
+                } else if (attributeInfo.getType().equals(String.class)) {
+                    attributesProject.add(AttributeBuilder.build(attributeInfo.getName(), "ProjectExample"));
+                } else if (attributeInfo.getType().equals(Boolean.class)) {
+                    attributesProject.add(AttributeBuilder.build(attributeInfo.getName(), true));
                 }
             }
         }
@@ -125,7 +121,7 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
         openStackConnector.executeQuery(objectClassProject, filterProject, handlerProject, options);
 
         try {
-            if(!resultsProject.get(0).getAttributes().containsAll(attributesProject)){
+            if (!resultsProject.get(0).getAttributes().containsAll(attributesProject)) {
                 throw new InvalidAttributeValueException("Attributes of created project and searched project is not same.");
             }
         } finally {
@@ -135,24 +131,24 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
     }
 
     @Test
-    public void schemaTestDomainObjectClass(){
+    public void schemaTestDomainObjectClass() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration configuration = getConfiguration();
         openStackConnector.init(configuration);
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Schema schema = openStackConnector.schema();
 
         Set<AttributeInfo> attributesInfoDomain = schema.findObjectClassInfo("Domain").getAttributeInfo();
         Set<Attribute> attributesDomain = new HashSet<Attribute>();
 
-        for(AttributeInfo attributeInfo : attributesInfoDomain){
-            if(!attributeInfo.isMultiValued() && attributeInfo.isCreateable() && attributeInfo.isReadable()){
-                 if(attributeInfo.getType().equals(String.class)){
-                    attributesDomain.add(AttributeBuilder.build(attributeInfo.getName(),"DomainExample"));
-                }else if(attributeInfo.getType().equals(Boolean.class)){
-                    attributesDomain.add(AttributeBuilder.build(attributeInfo.getName(),true));
+        for (AttributeInfo attributeInfo : attributesInfoDomain) {
+            if (!attributeInfo.isMultiValued() && attributeInfo.isCreateable() && attributeInfo.isReadable()) {
+                if (attributeInfo.getType().equals(String.class)) {
+                    attributesDomain.add(AttributeBuilder.build(attributeInfo.getName(), "DomainExample"));
+                } else if (attributeInfo.getType().equals(Boolean.class)) {
+                    attributesDomain.add(AttributeBuilder.build(attributeInfo.getName(), true));
                 }
             }
         }
@@ -179,14 +175,14 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
         openStackConnector.executeQuery(objectClassDomain, filterDomain, handlerDomain, options);
 
         try {
-            if(!resultsDomain.get(0).getAttributes().containsAll(attributesDomain)){
+            if (!resultsDomain.get(0).getAttributes().containsAll(attributesDomain)) {
                 throw new InvalidAttributeValueException("Attributes of created domain and searched domain is not same.");
             }
         } finally {
             //to delete domain must disable first
             Set<Attribute> attributesAccount3 = new HashSet<>();
             attributesAccount3.add(AttributeBuilder.build("enabled", false));
-            openStackConnector.update(objectClassDomain,uidDomain,attributesAccount3,options);
+            openStackConnector.update(objectClassDomain, uidDomain, attributesAccount3, options);
 
             openStackConnector.delete(objectClassDomain, uidDomain, options);
             openStackConnector.dispose();
@@ -194,24 +190,24 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
     }
 
     @Test
-    public void schemaTestRoleObjectClass(){
+    public void schemaTestRoleObjectClass() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration configuration = getConfiguration();
         openStackConnector.init(configuration);
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Schema schema = openStackConnector.schema();
 
         Set<AttributeInfo> attributesInfoRole = schema.findObjectClassInfo("Role").getAttributeInfo();
         Set<Attribute> attributesRole = new HashSet<Attribute>();
 
-        for(AttributeInfo attributeInfo : attributesInfoRole){
-            if(!attributeInfo.isMultiValued() && attributeInfo.isCreateable() && attributeInfo.isReadable()){
-                if(attributeInfo.getName().equals("domain_id")){
-                    attributesRole.add(AttributeBuilder.build(attributeInfo.getName(),"default"));
-                }  else if(attributeInfo.getType().equals(String.class)){
-                    attributesRole.add(AttributeBuilder.build(attributeInfo.getName(),"RoleExample"));
+        for (AttributeInfo attributeInfo : attributesInfoRole) {
+            if (!attributeInfo.isMultiValued() && attributeInfo.isCreateable() && attributeInfo.isReadable()) {
+                if (attributeInfo.getName().equals("domain_id")) {
+                    attributesRole.add(AttributeBuilder.build(attributeInfo.getName(), "default"));
+                } else if (attributeInfo.getType().equals(String.class)) {
+                    attributesRole.add(AttributeBuilder.build(attributeInfo.getName(), "RoleExample"));
                 }
             }
         }
@@ -238,7 +234,7 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
         openStackConnector.executeQuery(objectClassRole, filterRole, handlerRole, options);
 
         try {
-            if(!resultsRole.get(0).getAttributes().containsAll(attributesRole)){
+            if (!resultsRole.get(0).getAttributes().containsAll(attributesRole)) {
                 throw new InvalidAttributeValueException("Attributes of created role and searched role is not same.");
             }
         } finally {
@@ -248,37 +244,37 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
     }
 
     @Test
-    public void schemaTestAccountObjectClass(){
+    public void schemaTestAccountObjectClass() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration configuration = getConfiguration();
         openStackConnector.init(configuration);
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         Schema schema = openStackConnector.schema();
 
         Set<AttributeInfo> attributesInfoAccount = schema.findObjectClassInfo(ObjectClass.ACCOUNT_NAME).getAttributeInfo();
         Set<Attribute> attributesAccount = new HashSet<Attribute>();
 
-        for(AttributeInfo attributeInfo : attributesInfoAccount){
-            if(!attributeInfo.isMultiValued() && attributeInfo.isCreateable() && attributeInfo.isReadable()){
-                if(attributeInfo.getName().equals("domain_id")){
-                    attributesAccount.add(AttributeBuilder.build(attributeInfo.getName(),"default"));
-                } else if(attributeInfo.getType().equals(String.class)){
-                    attributesAccount.add(AttributeBuilder.build(attributeInfo.getName(),"AccountExample"));
-                }else if(attributeInfo.getType().equals(Boolean.class)){
-                    attributesAccount.add(AttributeBuilder.build(attributeInfo.getName(),true));
+        for (AttributeInfo attributeInfo : attributesInfoAccount) {
+            if (!attributeInfo.isMultiValued() && attributeInfo.isCreateable() && attributeInfo.isReadable()) {
+                if (attributeInfo.getName().equals("domain_id")) {
+                    attributesAccount.add(AttributeBuilder.build(attributeInfo.getName(), "default"));
+                } else if (attributeInfo.getType().equals(String.class)) {
+                    attributesAccount.add(AttributeBuilder.build(attributeInfo.getName(), "AccountExample"));
+                } else if (attributeInfo.getType().equals(Boolean.class)) {
+                    attributesAccount.add(AttributeBuilder.build(attributeInfo.getName(), true));
                 }
             }
         }
 
         GuardedString pass = new GuardedString("AccountExample".toCharArray());
-        attributesAccount.add(AttributeBuilder.build("__PASSWORD__",pass));
+        attributesAccount.add(AttributeBuilder.build("__PASSWORD__", pass));
 
         ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
         Uid uidAccount = openStackConnector.create(objectClassAccount, attributesAccount, options);
 
-        attributesAccount.remove(AttributeBuilder.build("__PASSWORD__",pass));
+        attributesAccount.remove(AttributeBuilder.build("__PASSWORD__", pass));
 
 
         AttributeFilter filterAccount;
@@ -307,7 +303,7 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
         System.out.println("\n\n");
 
         try {
-            if(!resultsAccount.get(0).getAttributes().containsAll(attributesAccount)){
+            if (!resultsAccount.get(0).getAttributes().containsAll(attributesAccount)) {
                 throw new InvalidAttributeValueException("Attributes of created account and searched account is not same.");
             }
         } finally {

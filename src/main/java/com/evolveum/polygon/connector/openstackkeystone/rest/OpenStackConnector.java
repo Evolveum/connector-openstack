@@ -34,7 +34,6 @@ public class OpenStackConnector implements Connector,
     private static final String DOMAIN_NAME = "Domain";
 
 
-
     @Override
     public Configuration getConfiguration() {
         return null;
@@ -81,7 +80,7 @@ public class OpenStackConnector implements Connector,
             RoleProcessing roleProcessing = new RoleProcessing(configuration);
             return roleProcessing.createRole(attributes);
 
-        }  else if (objectClass.is(DOMAIN_NAME)) {
+        } else if (objectClass.is(DOMAIN_NAME)) {
             DomainProcessing domainProcessing = new DomainProcessing(configuration);
             return domainProcessing.createDomain(attributes);
 
@@ -120,7 +119,7 @@ public class OpenStackConnector implements Connector,
             RoleProcessing roleProcessing = new RoleProcessing(configuration);
             roleProcessing.deleteRole(uid);
 
-        }else if (objectClass.is(DOMAIN_NAME)) {
+        } else if (objectClass.is(DOMAIN_NAME)) {
             DomainProcessing domainProcessing = new DomainProcessing(configuration);
             domainProcessing.deleteDomain(uid);
         }
@@ -192,11 +191,11 @@ public class OpenStackConnector implements Connector,
             ProjectProcessing projectProcessing = new ProjectProcessing(configuration);
             projectProcessing.executeQueryForProject(query, handler, options);
 
-        }else if (objectClass.is(ROLE_NAME)) {
+        } else if (objectClass.is(ROLE_NAME)) {
             RoleProcessing roleProcessing = new RoleProcessing(configuration);
             roleProcessing.executeQueryForRole(query, handler, options);
 
-        }else if (objectClass.is(DOMAIN_NAME)) {
+        } else if (objectClass.is(DOMAIN_NAME)) {
             DomainProcessing domainProcessing = new DomainProcessing(configuration);
             domainProcessing.executeQueryForDomain(query, handler, options);
 
@@ -215,6 +214,7 @@ public class OpenStackConnector implements Connector,
 
     @Override
     public Uid addAttributeValues(ObjectClass objectClass, Uid uid, Set<Attribute> attributes, OperationOptions operationOptions) {
+        LOG.info("addAttributeValues, objectClass {0}, uid {1}, attributes {2}, operationOptions {3}", objectClass, uid, attributes, operationOptions);
         if (objectClass == null) {
             LOG.error("Parameter of type ObjectClass not provided.");
             throw new InvalidAttributeValueException("Parameter of type ObjectClass not provided.");
