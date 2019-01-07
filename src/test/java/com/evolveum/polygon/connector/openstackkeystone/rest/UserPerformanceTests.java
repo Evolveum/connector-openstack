@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class UserPerformanceTests extends BasicConfigurationForTests {
 
-    private Uid targaryenUid;
+    private Uid prideRockUid;
     private Set<Uid> usersUid = new HashSet<Uid>();
 
     @Test(priority = 20)
@@ -31,12 +31,12 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
 
         ObjectClass objectClassGroup = ObjectClass.GROUP;
         openStackConnector.init(configuration);
-        targaryenUid = openStackConnector.create(objectClassGroup, attributesCreatedGroup, options);
+        prideRockUid = openStackConnector.create(objectClassGroup, attributesCreatedGroup, options);
         openStackConnector.dispose();
 
         ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 500; i++) {
             Set<Attribute> attributes = new HashSet<Attribute>();
             attributes.add(AttributeBuilder.build("email", "testUserPer" + i + "@performance.com"));
             GuardedString pass = new GuardedString(("testUserPer" + i).toCharArray());
@@ -89,7 +89,7 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
         Set<Attribute> usersUidAttributes = new HashSet<Attribute>(usersUid);
 
         openStackConnector.init(configuration);
-        openStackConnector.addAttributeValues(objectClassGroup, targaryenUid, usersUidAttributes, options);
+        openStackConnector.addAttributeValues(objectClassGroup, prideRockUid, usersUidAttributes, options);
         openStackConnector.dispose();
     }
 
@@ -103,7 +103,7 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
         OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         AttributeFilter equalsFilter;
-        equalsFilter = (EqualsFilter) FilterBuilder.equalTo(targaryenUid);
+        equalsFilter = (EqualsFilter) FilterBuilder.equalTo(prideRockUid);
 
         final ArrayList<ConnectorObject> resultsGroup = new ArrayList<>();
         SearchResultsHandler handlerGroup = new SearchResultsHandler() {
@@ -123,7 +123,7 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
         openStackConnector.executeQuery(objectClassGroup, equalsFilter, handlerGroup, options);
         openStackConnector.dispose();
 
-        if (resultsGroup.size() == 0 || resultsGroup.get(0).getAttributeByName("group_members") == null || resultsGroup.get(0).getAttributeByName("group_members").getValue().size() != 10) {
+        if (resultsGroup.size() == 0 || resultsGroup.get(0).getAttributeByName("group_members") == null || resultsGroup.get(0).getAttributeByName("group_members").getValue().size() != 500) {
             throw new InvalidAttributeValueException("Group doesn't 500 members.");
         }
     }
@@ -140,7 +140,7 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
         Set<Attribute> usersUidAttributes = new HashSet<Attribute>(usersUid);
 
         openStackConnector.init(configuration);
-        openStackConnector.removeAttributeValues(objectClassGroup, targaryenUid, usersUidAttributes, options);
+        openStackConnector.removeAttributeValues(objectClassGroup, prideRockUid, usersUidAttributes, options);
         openStackConnector.dispose();
     }
 
@@ -153,7 +153,7 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
         OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         AttributeFilter equalsFilter;
-        equalsFilter = (EqualsFilter) FilterBuilder.equalTo(targaryenUid);
+        equalsFilter = (EqualsFilter) FilterBuilder.equalTo(prideRockUid);
 
         final ArrayList<ConnectorObject> resultsGroup = new ArrayList<>();
         SearchResultsHandler handlerGroup = new SearchResultsHandler() {
@@ -188,7 +188,7 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
         OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         openStackConnector.init(configuration);
-        openStackConnector.delete(objectClassGroup, targaryenUid, options);
+        openStackConnector.delete(objectClassGroup, prideRockUid, options);
         openStackConnector.dispose();
 
         for (Uid user : usersUid) {

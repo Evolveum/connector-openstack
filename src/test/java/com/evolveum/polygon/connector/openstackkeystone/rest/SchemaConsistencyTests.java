@@ -296,11 +296,6 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
 
         openStackConnector.executeQuery(objectClassAccount, filterAccount, handlerAccount, options);
 
-        System.out.println("\n\n");
-        System.out.println(attributesAccount);
-        System.out.println("\n\n");
-        System.out.println(resultsAccount.get(0).getAttributes());
-        System.out.println("\n\n");
 
         try {
             if (!resultsAccount.get(0).getAttributes().containsAll(attributesAccount)) {
