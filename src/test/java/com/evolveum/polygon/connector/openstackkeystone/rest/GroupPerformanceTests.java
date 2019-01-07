@@ -1,22 +1,15 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
-import java.util.*;
-
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
-import org.identityconnectors.framework.common.objects.Attribute;
-import org.identityconnectors.framework.common.objects.AttributeBuilder;
-import org.identityconnectors.framework.common.objects.ConnectorObject;
-import org.identityconnectors.framework.common.objects.ObjectClass;
-import org.identityconnectors.framework.common.objects.OperationOptions;
-import org.identityconnectors.framework.common.objects.SearchResult;
-import org.identityconnectors.framework.common.objects.Uid;
+import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.AttributeFilter;
-import org.identityconnectors.framework.common.objects.filter.ContainsAllValuesFilter;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.FilterBuilder;
 import org.identityconnectors.framework.spi.SearchResultsHandler;
 import org.testng.annotations.Test;
+
+import java.util.*;
 
 
 public class GroupPerformanceTests extends BasicConfigurationForTests {
@@ -26,19 +19,19 @@ public class GroupPerformanceTests extends BasicConfigurationForTests {
 
 
     @Test(priority = 30)
-    public void Create500Groups(){
+    public void Create500Groups() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration configuration = getConfiguration();
 
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         ObjectClass objectClassGroup = ObjectClass.GROUP;
 
-        for(int i=0; i<500;i++){
+        for (int i = 0; i < 500; i++) {
 
             Set<Attribute> attributesCreatedGroup = new HashSet<Attribute>();
-            attributesCreatedGroup.add(AttributeBuilder.build("__NAME__","Name testGroupPer"+i));
+            attributesCreatedGroup.add(AttributeBuilder.build("__NAME__", "Name testGroupPer" + i));
             attributesCreatedGroup.add(AttributeBuilder.build("description", "The Lion King"));
             attributesCreatedGroup.add(AttributeBuilder.build("domain_id", "default"));
             openStackConnector.init(configuration);
@@ -51,20 +44,20 @@ public class GroupPerformanceTests extends BasicConfigurationForTests {
     }
 
     @Test(priority = 31)
-    public void Update500GroupsTest(){
+    public void Update500GroupsTest() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration configuration = getConfiguration();
 
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         ObjectClass objectClassGroup = ObjectClass.GROUP;
-        int i =0;
-        for(Uid groupUid : groupsUid){
+        int i = 0;
+        for (Uid groupUid : groupsUid) {
 
             Set<Attribute> attributesUpdateGroup = new HashSet<Attribute>();
             attributesUpdateGroup.add(AttributeBuilder.build("description", "The Lion King - updated"));
-            attributesUpdateGroup.add(AttributeBuilder.build("__NAME__", "Name testGroupPer"+ i + " Update"));
+            attributesUpdateGroup.add(AttributeBuilder.build("__NAME__", "Name testGroupPer" + i + " Update"));
             openStackConnector.init(configuration);
             openStackConnector.update(objectClassGroup, groupUid, attributesUpdateGroup, options);
             openStackConnector.dispose();
@@ -73,11 +66,11 @@ public class GroupPerformanceTests extends BasicConfigurationForTests {
     }
 
     @Test(priority = 32)
-    public void CreateUserAndAddUserToEachGroupTest(){
+    public void CreateUserAndAddUserToEachGroupTest() {
         OpenStackConnector gitlabRestConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration configuration = getConfiguration();
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         ObjectClass objectClassGroup = ObjectClass.GROUP;
         ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
@@ -91,17 +84,17 @@ public class GroupPerformanceTests extends BasicConfigurationForTests {
         gitlabRestConnector.init(configuration);
         simbaUid = gitlabRestConnector.create(objectClassAccount, attributesAccount, options);
         gitlabRestConnector.dispose();
-        Set <Attribute> simbaAttributeUid = new HashSet<Attribute>(Collections.singleton(simbaUid));
-        for(Uid groupUid : groupsUid){
+        Set<Attribute> simbaAttributeUid = new HashSet<Attribute>(Collections.singleton(simbaUid));
+        for (Uid groupUid : groupsUid) {
             gitlabRestConnector.init(configuration);
-            gitlabRestConnector.addAttributeValues(objectClassGroup, groupUid , simbaAttributeUid, options);
+            gitlabRestConnector.addAttributeValues(objectClassGroup, groupUid, simbaAttributeUid, options);
             gitlabRestConnector.dispose();
         }
     }
 
 
     @Test(priority = 33)
-    public void SearchGroupsWithContainsAllValuesFilterTest(){
+    public void SearchGroupsWithContainsAllValuesFilterTest() {
         OpenStackConnector openStackConnector = new OpenStackConnector();
         OpenStackConnectorConfiguration configuration = getConfiguration();
         ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
@@ -137,14 +130,14 @@ public class GroupPerformanceTests extends BasicConfigurationForTests {
     }
 
     @Test(priority = 34)
-    public void Delete500GroupAndUserTest(){
+    public void Delete500GroupAndUserTest() {
         OpenStackConnector gitlabRestConnector = new OpenStackConnector();
         OpenStackConnectorConfiguration configuration = getConfiguration();
         ObjectClass objectClassGroup = ObjectClass.GROUP;
         ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
-        OperationOptions options = new OperationOptions(new HashMap<String,Object>());
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
-        for(Uid group : groupsUid){
+        for (Uid group : groupsUid) {
             gitlabRestConnector.init(configuration);
             gitlabRestConnector.delete(objectClassGroup, group, options);
             gitlabRestConnector.dispose();

@@ -210,4 +210,52 @@ public class RoleProcessing extends ObjectProcessing {
         } else throw new UnknownUidException("Returned Role object is null");
     }
 
+    //Grant a role to a user in a project
+    public void grantProjectUserRole(String projectId, String userId, Uid roleUid) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().grantProjectUserRole(projectId, userId, roleUid.getUidValue());
+    }
+
+    //Revoke a role from a user in a project
+    public void revokeProjectUserRole(String projectId, String userId, Uid roleUid) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().revokeProjectUserRole(projectId, userId, roleUid.getUidValue());
+    }
+
+    //Grant a role to a user in a domain
+    public void grantDomainUserRole(String domainId, String userId, Uid roleUid) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().grantDomainUserRole(domainId, userId, roleUid.getUidValue());
+    }
+
+    //Revoke a role from a user in a domain
+    public void revokeDomainUserRole(String domainId, String userId, Uid roleUid) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().revokeDomainUserRole(domainId, userId, roleUid.getUidValue());
+    }
+
+    //Grant a role to a group in a project
+    public void grantProjectGroupRole(String projectId, String groupId, Uid roleUid) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().grantProjectGroupRole(projectId, groupId, roleUid.getUidValue());
+    }
+
+    //Revoke a role from a group in a project
+    public void revokeProjectGroupRole(String projectId, String groupId, Uid roleUid) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().revokeProjectGroupRole(projectId, groupId, roleUid.getUidValue());
+    }
+
+    //Grant a role to a group in a domain
+    public void grantDomainGroupRole(String domainId, String groupId, Uid roleUid) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().grantDomainGroupRole(domainId, groupId, roleUid.getUidValue());
+    }
+
+    //Revoke a role from a group in a domain
+    public void revokeDomainGroupRole(String domainId, String groupId, Uid roleUid) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().revokeDomainGroupRole(domainId, groupId, roleUid.getUidValue());
+    }
+
 }

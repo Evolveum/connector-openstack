@@ -199,7 +199,6 @@ public class GroupProcessing extends ObjectProcessing {
             LOG.info("query==null");
 
             OSClientV3 os = authenticate(getConfiguration());
-
             List<? extends Group> groups = os.identity().groups().list();
             for (Group group : groups) {
                 List<? extends User> listGroupUsers = os.identity().groups().listGroupUsers(group.getId());

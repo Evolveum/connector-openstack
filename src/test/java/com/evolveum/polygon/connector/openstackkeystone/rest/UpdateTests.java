@@ -212,7 +212,7 @@ public class UpdateTests extends BasicConfigurationForTests {
         Set<Attribute> attributesCreateProject = new HashSet<Attribute>();
         attributesCreateProject.add(AttributeBuilder.build("description", "The Lion King"));
         attributesCreateProject.add(AttributeBuilder.build("enabled", true));
-        attributesCreateProject.add(AttributeBuilder.build("__NAME__", "Ed Domain"));
+        attributesCreateProject.add(AttributeBuilder.build("__NAME__", "Ed Project"));
         attributesCreateProject.add(AttributeBuilder.build("domain_id", "default"));
 
 
