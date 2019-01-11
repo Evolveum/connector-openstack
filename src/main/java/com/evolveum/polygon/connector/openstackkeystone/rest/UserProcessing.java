@@ -9,6 +9,7 @@ import org.identityconnectors.framework.common.exceptions.UnknownUidException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
+import org.openstack4j.api.OSClient;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.identity.v3.Group;
 import org.openstack4j.model.identity.v3.User;
@@ -33,6 +34,8 @@ public class UserProcessing extends ObjectProcessing {
 
 
     private static final String USERGROUPS = "usergroups";
+    private static final String USERROLES = "userroles";
+    private static final String USERTOGROUP = "usertogroup";
 
     private static final String LINKS = "links";
 
@@ -91,6 +94,14 @@ public class UserProcessing extends ObjectProcessing {
         AttributeInfoBuilder attrUserInGroups = new AttributeInfoBuilder(USERGROUPS);
         attrUserInGroups.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
         userObjClassBuilder.addAttributeInfo(attrUserInGroups.build());
+
+        AttributeInfoBuilder attrUserRoles = new AttributeInfoBuilder(USERROLES);
+        attrUserRoles.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
+        userObjClassBuilder.addAttributeInfo(attrUserRoles.build());
+
+        AttributeInfoBuilder attrUserToGroup = new AttributeInfoBuilder(USERTOGROUP);
+        attrUserToGroup.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
+        userObjClassBuilder.addAttributeInfo(attrUserToGroup.build());
 
         schemaBuilder.defineObjectClass(userObjClassBuilder.build());
 
@@ -242,7 +253,6 @@ public class UserProcessing extends ObjectProcessing {
             List<? extends User> users = os.identity().users().list();
             for (User user : users) {
                 List<? extends Group> listUserGroups = os.identity().users().listUserGroups(user.getId());
-
                 convertUserToConnectorObject(user, handler, null);
             }
         }
@@ -305,5 +315,43 @@ public class UserProcessing extends ObjectProcessing {
             handler.handle(connectorObject);
 
         } else throw new UnknownUidException("Returned User object is null");
+    }
+
+    //Grant a role to a user in a project
+    public void grantProjectUserRole(String projectId, String userId, String roleId) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().grantProjectUserRole(projectId, userId, roleId);
+    }
+
+    //Revoke a role from a user in a project
+    public void revokeProjectUserRole(String projectId, String userId, String roleUid) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().revokeProjectUserRole(projectId, userId, roleUid);
+    }
+
+
+    //Grant a role to a user in a domain
+    public void grantDomainUserRole(String domainId, String userId, String roleId) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().grantDomainUserRole(domainId, userId, roleId);
+    }
+
+    //Revoke a role from a user in a domain
+    public void revokeDomainUserRole(String domainId, String userId, String roleId) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().revokeDomainUserRole(domainId, userId, roleId);
+    }
+
+    public void addUserToGroup(String groupId, String userId) {
+        OSClientV3 os = authenticate(getConfiguration());
+        //addUserToGroup("groupId", "userId");
+        os.identity().groups().addUserToGroup(groupId, userId);
+
+    }
+
+    public void removeUserFromGroup(String groupId, String userId) {
+        OSClientV3 os = authenticate(getConfiguration());
+        //removeUserFromGroup("groupId", "userId");
+        os.identity().groups().removeUserFromGroup(groupId, userId);
     }
 }

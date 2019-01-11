@@ -6,6 +6,7 @@ import org.identityconnectors.framework.common.exceptions.UnknownUidException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
+import org.openstack4j.api.OSClient;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.identity.v3.Group;
 import org.openstack4j.model.identity.v3.User;
@@ -145,21 +146,6 @@ public class GroupProcessing extends ObjectProcessing {
         } else throw new UnknownUidException("Returned Group object is null");
     }
 
-    public void addUserToGroup(Uid uid, Set<Attribute> attributes) {
-        OSClientV3 os = authenticate(getConfiguration());
-        //addUserToGroup("groupId", "userId");
-        for (Attribute attribute : attributes) {
-            os.identity().groups().addUserToGroup(uid.getUidValue(), AttributeUtil.getAsStringValue(attribute));
-        }
-    }
-
-    public void removeUserFromGroup(Uid uid, Set<Attribute> attributes) {
-        OSClientV3 os = authenticate(getConfiguration());
-        for (Attribute attribute : attributes) {
-            os.identity().groups().removeUserFromGroup(uid.getUidValue(), AttributeUtil.getAsStringValue(attribute));
-        }
-    }
-
     public void executeQueryForGroup(Filter query, ResultsHandler handler, OperationOptions options) {
         LOG.info("executeQueryForGroup()");
         if (query instanceof EqualsFilter) {
@@ -250,4 +236,28 @@ public class GroupProcessing extends ObjectProcessing {
         } else throw new UnknownUidException("Returned Group object is null");
     }
 
+
+    //Grant a role to a group in a project
+    public void grantProjectGroupRole(String projectId, String groupId, String roleId) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().grantProjectGroupRole(projectId, groupId, roleId);
+    }
+
+    //Revoke a role from a group in a project
+    public void revokeProjectGroupRole(String projectId, String groupId, String roleId) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().revokeProjectGroupRole(projectId, groupId, roleId);
+    }
+
+    //Grant a role to a group in a domain
+    public void grantDomainGroupRole(String domainId, String groupId, String roleId) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().grantDomainGroupRole(domainId, groupId, roleId);
+    }
+
+    //Revoke a role from a group in a domain
+    public void revokeDomainGroupRole(String domainId, String groupId, String roleId) {
+        OSClient.OSClientV3 os = authenticate(getConfiguration());
+        os.identity().roles().revokeDomainGroupRole(domainId, groupId, roleId);
+    }
 }

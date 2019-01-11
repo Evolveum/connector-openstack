@@ -3,7 +3,6 @@ package com.evolveum.polygon.connector.openstackkeystone.rest;
 
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.common.exceptions.UnknownUidException;
-import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.AttributeFilter;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.FilterBuilder;

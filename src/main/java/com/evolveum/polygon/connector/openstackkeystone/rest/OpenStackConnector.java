@@ -230,47 +230,73 @@ public class OpenStackConnector implements Connector,
 
         if (objectClass.is(ObjectClass.GROUP_NAME)) {
             GroupProcessing groupProcessing = new GroupProcessing(configuration);
-            groupProcessing.addUserToGroup(uid, attributes);
-        }
-        if (objectClass.is(ROLE_NAME)) {
-            RoleProcessing roleProcessing = new RoleProcessing(configuration);
             for (Attribute attribute : attributes) {
-
-                //projectId:userId, roleId
-                if (AttributeUtil.getStringValue(attribute).contains(":")) {
-                    String[] split = AttributeUtil.getStringValue(attribute).split(":");
-                    String projectId = split[0];
-                    String userId = split[1];
-                    LOG.info("projectId: {0}, userId {1}, roleId {2} ", projectId, userId, uid.getUidValue());
-                    roleProcessing.grantProjectUserRole(projectId, userId, uid);
-
-                    //domainId.userId, roleId
-                } else if (AttributeUtil.getStringValue(attribute).contains(".")) {
-                    String[] split = AttributeUtil.getStringValue(attribute).split(".");
-                    String domainId = split[0];
-                    String userId = split[1];
-                    LOG.info("domainId: {0}, userId {1}, roleId {2} ", domainId, userId, uid.getUidValue());
-                    roleProcessing.grantDomainUserRole(domainId, userId, uid);
-
-                    //projectId-groupId, roleId
-                } else if (AttributeUtil.getStringValue(attribute).contains("-")) {
-                    String[] split = AttributeUtil.getStringValue(attribute).split("-");
-                    String projectId = split[0];
-                    String groupId = split[1];
-                    LOG.info("projectId: {0}, groupId {1}, roleId {2} ", projectId, groupId, uid.getUidValue());
-                    roleProcessing.grantProjectGroupRole(projectId, groupId, uid);
+                if (attribute.getName().equals("grouproles")) {
+                    for (Object v : attribute.getValue()) {
+                        LOG.info("value {0}", v);
+                        if (!(v instanceof String)) {
+                            LOG.error("Not string!");
+                        } else {
+                            //attribute=projectId:roleId, uid=groupId
+                            if (((String) v).contains(":")) {
+                                String[] split = AttributeUtil.getStringValue(attribute).split(":");
+                                String projectId = split[0];
+                                String roleId = split[1];
+                                String groupId = uid.getUidValue();
+                                LOG.info("projectId: {0}, groupId {1}, roleId {2} ", projectId, groupId, roleId);
+                                groupProcessing.grantProjectGroupRole(projectId, groupId, roleId);
+                            }
+                            //attribute=domainId.roleId, uid=groupId
+                            else if (((String) v).contains(".")) {
+                                String[] split = AttributeUtil.getStringValue(attribute).split(".");
+                                String domainId = split[0];
+                                String roleId = split[1];
+                                String groupId = uid.getUidValue();
+                                LOG.info("domainId: {0}, groupId {1}, roleId {2} ", domainId, groupId, roleId);
+                                groupProcessing.grantDomainGroupRole(domainId, groupId, roleId);
+                            }
+                        }
+                    }
                 }
-                //domainId/groupId, roleId
-                else if (AttributeUtil.getStringValue(attribute).contains("/")) {
-                    String[] split = AttributeUtil.getStringValue(attribute).split("/");
-                    String domainId = split[0];
-                    String groupId = split[1];
-                    LOG.info("domainId: {0}, groupId {1}, roleId {2} ", domainId, groupId, uid.getUidValue());
-                    roleProcessing.grantDomainGroupRole(domainId, groupId, uid);
-                } else LOG.error("Attribute not contains \":\" , \".\" , \"-\" and \"/\"");
-
+            }
+            if (objectClass.is(ObjectClass.ACCOUNT_NAME)) {
+                UserProcessing userProcessing = new UserProcessing(configuration);
+                for (Attribute attribute : attributes) {
+                    if (attribute.getName().equals("userroles")) {
+                        for (Object v : attribute.getValue()) {
+                            LOG.info("value {0}", v);
+                            if (!(v instanceof String)) {
+                                LOG.error("Not string!");
+                            } else {
+                                //attribute=projectId:roleId, uid=userId
+                                if (((String) v).contains(":")) {
+                                    String[] split = AttributeUtil.getStringValue(attribute).split(":");
+                                    String projectId = split[0];
+                                    String roleId = split[1];
+                                    String userId = uid.getUidValue();
+                                    LOG.info("projectId: {0}, userId {1}, roleId {2} ", projectId, userId, roleId);
+                                    userProcessing.grantProjectUserRole(projectId, userId, roleId);
+                                }
+                                //attribute=domainId.roleId, uid=userId
+                                else if (((String) v).contains(".")) {
+                                    String[] split = AttributeUtil.getStringValue(attribute).split(".");
+                                    String domainId = split[0];
+                                    String roleId = split[1];
+                                    String userId = uid.getUidValue();
+                                    LOG.info("domainId: {0}, userId {1}, roleId {2} ", domainId, userId, roleId);
+                                    userProcessing.grantDomainUserRole(domainId, userId, roleId);
+                                }
+                            }
+                        }
+                    } else if (attribute.getName().equals("usertogroup")) {
+                        String userId = uid.getUidValue();
+                        String groupId = AttributeUtil.getStringValue(attribute);
+                        userProcessing.addUserToGroup(groupId, userId);
+                    }
+                }
             }
         }
+
 
         return uid;
     }
@@ -292,44 +318,70 @@ public class OpenStackConnector implements Connector,
 
         if (objectClass.is(ObjectClass.GROUP_NAME)) {
             GroupProcessing groupProcessing = new GroupProcessing(configuration);
-            groupProcessing.removeUserFromGroup(uid, attributes);
-        } else if (objectClass.is(ROLE_NAME)) {
-            RoleProcessing roleProcessing = new RoleProcessing(configuration);
             for (Attribute attribute : attributes) {
-
-                //projectId:userId, roleId
-                if (AttributeUtil.getStringValue(attribute).contains(":")) {
-                    String[] split = AttributeUtil.getStringValue(attribute).split(":");
-                    String projectId = split[0];
-                    String userId = split[1];
-                    LOG.info("projectId: {0}, userId {1}, roleId {2} ", projectId, userId, uid.getUidValue());
-                    roleProcessing.revokeProjectUserRole(projectId, userId, uid);
-
-                    //domainId.userId, roleId
-                } else if (AttributeUtil.getStringValue(attribute).contains(".")) {
-                    String[] split = AttributeUtil.getStringValue(attribute).split(".");
-                    String domainId = split[0];
-                    String userId = split[1];
-                    LOG.info("domainId: {0}, userId {1}, roleId {2} ", domainId, userId, uid.getUidValue());
-                    roleProcessing.revokeDomainUserRole(domainId, userId, uid);
-
-                    //projectId-groupId, roleId
-                } else if (AttributeUtil.getStringValue(attribute).contains("-")) {
-                    String[] split = AttributeUtil.getStringValue(attribute).split("-");
-                    String projectId = split[0];
-                    String groupId = split[1];
-                    LOG.info("projectId: {0}, groupId {1}, roleId {2} ", projectId, groupId, uid.getUidValue());
-                    roleProcessing.revokeProjectGroupRole(projectId, groupId, uid);
+                if (attribute.getName().equals("grouproles")) {
+                    for (Object v : attribute.getValue()) {
+                        LOG.info("value {0}", v);
+                        if (!(v instanceof String)) {
+                            LOG.error("Not string!");
+                        } else {
+                            //attribute=projectId:roleId, uid=groupId
+                            if (((String) v).contains(":")) {
+                                String[] split = AttributeUtil.getStringValue(attribute).split(":");
+                                String projectId = split[0];
+                                String roleId = split[1];
+                                String groupId = uid.getUidValue();
+                                LOG.info("projectId: {0}, groupId {1}, roleId {2} ", projectId, groupId, roleId);
+                                groupProcessing.revokeProjectGroupRole(projectId, groupId, roleId);
+                            }
+                            //attribute=domainId.roleId, uid=groupId
+                            else if (((String) v).contains(".")) {
+                                String[] split = AttributeUtil.getStringValue(attribute).split(".");
+                                String domainId = split[0];
+                                String roleId = split[1];
+                                String groupId = uid.getUidValue();
+                                LOG.info("domainId: {0}, groupId {1}, roleId {2} ", domainId, groupId, roleId);
+                                groupProcessing.revokeDomainGroupRole(domainId, groupId, roleId);
+                            }
+                        }
+                    }
                 }
-                //domainId/groupId, roleId
-                else if (AttributeUtil.getStringValue(attribute).contains("/")) {
-                    String[] split = AttributeUtil.getStringValue(attribute).split("/");
-                    String domainId = split[0];
-                    String groupId = split[1];
-                    LOG.info("domainId: {0}, groupId {1}, roleId {2} ", domainId, groupId, uid.getUidValue());
-                    roleProcessing.revokeDomainGroupRole(domainId, groupId, uid);
-                } else LOG.error("Attribute not contains \":\" , \".\" , \"-\" and \"/\"");
+            }
+        } else if (objectClass.is(ObjectClass.ACCOUNT_NAME)) {
+            UserProcessing userProcessing = new UserProcessing(configuration);
+            for (Attribute attribute : attributes) {
+                if (attribute.getName().equals("userroles")) {
+                    for (Object v : attribute.getValue()) {
+                        LOG.info("value {0}", v);
+                        if (!(v instanceof String)) {
+                            LOG.error("Not string!");
+                        } else {
+                            //attribute=projectId:roleId, uid=userId
+                            if (((String) v).contains(":")) {
+                                String[] split = AttributeUtil.getStringValue(attribute).split(":");
+                                String projectId = split[0];
+                                String roleId = split[1];
+                                String userId = uid.getUidValue();
+                                LOG.info("projectId: {0}, userId {1}, roleId {2} ", projectId, userId, roleId);
+                                userProcessing.revokeProjectUserRole(projectId, userId, roleId);
+                            }
+                            //attribute=domainId.roleId, uid=userId
+                            else if (((String) v).contains(".")) {
+                                String[] split = AttributeUtil.getStringValue(attribute).split(".");
+                                String domainId = split[0];
+                                String roleId = split[1];
+                                String userId = uid.getUidValue();
+                                LOG.info("domainId: {0}, userId {1}, roleId {2} ", domainId, userId, roleId);
+                                userProcessing.revokeDomainUserRole(domainId, userId, roleId);
+                            }
+                        }
 
+                    }
+                } else if (attribute.getName().equals("usertogroup")) {
+                    String userId = uid.getUidValue();
+                    String groupId = AttributeUtil.getStringValue(attribute);
+                    userProcessing.removeUserFromGroup(groupId, userId);
+                }
             }
         }
 
