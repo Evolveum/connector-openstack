@@ -1,6 +1,7 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
 import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
+import org.identityconnectors.framework.common.objects.*;
 import org.openstack4j.api.exceptions.ClientResponseException;
 import org.testng.annotations.Test;
 

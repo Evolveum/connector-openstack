@@ -1,5 +1,6 @@
 package com.evolveum.polygon.connector.openstackkeystone.rest;
 
+import org.identityconnectors.framework.common.objects.*;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
