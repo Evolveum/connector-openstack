@@ -53,7 +53,7 @@ public class RoleProcessing extends ObjectProcessing {
 
         //read-only && multi-valued
         AttributeInfoBuilder attrLinks = new AttributeInfoBuilder(LINKS);
-        attrLinks.setRequired(false).setType(String.class).setCreateable(false).setUpdateable(false).setReadable(true).setMultiValued(true);
+            attrLinks.setRequired(false).setType(String.class).setCreateable(false).setUpdateable(false).setReadable(true).setMultiValued(true);
         roleObjClassBuilder.addAttributeInfo(attrLinks.build());
 
         schemaBuilder.defineObjectClass(roleObjClassBuilder.build());

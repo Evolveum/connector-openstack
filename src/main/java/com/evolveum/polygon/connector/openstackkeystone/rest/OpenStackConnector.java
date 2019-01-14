@@ -259,40 +259,40 @@ public class OpenStackConnector implements Connector,
                     }
                 }
             }
-            if (objectClass.is(ObjectClass.ACCOUNT_NAME)) {
-                UserProcessing userProcessing = new UserProcessing(configuration);
-                for (Attribute attribute : attributes) {
-                    if (attribute.getName().equals("userroles")) {
-                        for (Object v : attribute.getValue()) {
-                            LOG.info("value {0}", v);
-                            if (!(v instanceof String)) {
-                                LOG.error("Not string!");
-                            } else {
-                                //attribute=projectId:roleId, uid=userId
-                                if (((String) v).contains(":")) {
-                                    String[] split = AttributeUtil.getStringValue(attribute).split(":");
-                                    String projectId = split[0];
-                                    String roleId = split[1];
-                                    String userId = uid.getUidValue();
-                                    LOG.info("projectId: {0}, userId {1}, roleId {2} ", projectId, userId, roleId);
-                                    userProcessing.grantProjectUserRole(projectId, userId, roleId);
-                                }
-                                //attribute=domainId.roleId, uid=userId
-                                else if (((String) v).contains(".")) {
-                                    String[] split = AttributeUtil.getStringValue(attribute).split(".");
-                                    String domainId = split[0];
-                                    String roleId = split[1];
-                                    String userId = uid.getUidValue();
-                                    LOG.info("domainId: {0}, userId {1}, roleId {2} ", domainId, userId, roleId);
-                                    userProcessing.grantDomainUserRole(domainId, userId, roleId);
-                                }
+        } else if (objectClass.is(ObjectClass.ACCOUNT_NAME)) {
+            UserProcessing userProcessing = new UserProcessing(configuration);
+            for (Attribute attribute : attributes) {
+                LOG.info("attribute: {0}, attribute name: {1}, attribute value: {2}", attribute, attribute.getName(), attribute.getValue());
+                if (attribute.getName().equals("userroles")) {
+                    for (Object v : attribute.getValue()) {
+                        LOG.info("value {0}", v);
+                        if (!(v instanceof String)) {
+                            LOG.error("Not string!");
+                        } else {
+                            //attribute=projectId:roleId, uid=userId
+                            if (((String) v).contains(":")) {
+                                String[] split = AttributeUtil.getStringValue(attribute).split(":");
+                                String projectId = split[0];
+                                String roleId = split[1];
+                                String userId = uid.getUidValue();
+                                LOG.info("projectId: {0}, userId {1}, roleId {2} ", projectId, userId, roleId);
+                                userProcessing.grantProjectUserRole(projectId, userId, roleId);
+                            }
+                            //attribute=domainId.roleId, uid=userId
+                            else if (((String) v).contains(".")) {
+                                String[] split = AttributeUtil.getStringValue(attribute).split(".");
+                                String domainId = split[0];
+                                String roleId = split[1];
+                                String userId = uid.getUidValue();
+                                LOG.info("domainId: {0}, userId {1}, roleId {2} ", domainId, userId, roleId);
+                                userProcessing.grantDomainUserRole(domainId, userId, roleId);
                             }
                         }
-                    } else if (attribute.getName().equals("usertogroup")) {
-                        String userId = uid.getUidValue();
-                        String groupId = AttributeUtil.getStringValue(attribute);
-                        userProcessing.addUserToGroup(groupId, userId);
                     }
+                } else if (attribute.getName().equals("usertogroup")) {
+                    String userId = uid.getUidValue();
+                    String groupId = AttributeUtil.getStringValue(attribute);
+                    userProcessing.addUserToGroup(groupId, userId);
                 }
             }
         }
@@ -303,6 +303,7 @@ public class OpenStackConnector implements Connector,
 
     @Override
     public Uid removeAttributeValues(ObjectClass objectClass, Uid uid, Set<Attribute> attributes, OperationOptions operationOptions) {
+        LOG.info("removeAttributeValues, objectClass {0}, uid {1}, attributes {2}, operationOptions {3}", objectClass, uid, attributes, operationOptions);
         if (objectClass == null) {
             LOG.error("Parameter of type ObjectClass not provided.");
             throw new InvalidAttributeValueException("Parameter of type ObjectClass not provided.");
