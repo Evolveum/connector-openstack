@@ -11,6 +11,7 @@ import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.OSClient.OSClientV3;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.identity.v3.Group;
 import org.openstack4j.model.identity.v3.User;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneUser;
@@ -21,27 +22,17 @@ import java.util.Set;
 
 public class UserProcessing extends ObjectProcessing {
 
-    //required
-    private static final String NAME = "name";
-
     //optional
     private static final String DEFAULT_PROJECT_ID = "default_project_id";
     private static final String DOMAIN_ID = "domain_id";
-    private static final String ENABLED = "enabled";
-    private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
     private static final String DESCRIPTION = "description";
 
 
     private static final String USERGROUPS = "usergroups";
     private static final String USERROLES = "userroles";
-    private static final String USERTOGROUP = "usertogroup";
 
     private static final String LINKS = "links";
-
-
-    //The user ID
-    private static final String ID = "id";
 
 
     public UserProcessing(OpenStackConnectorConfiguration configuration) {
@@ -55,10 +46,6 @@ public class UserProcessing extends ObjectProcessing {
         userObjClassBuilder.setType(ObjectClass.ACCOUNT_NAME);
 
 
-//        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
-//        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
-//        userObjClassBuilder.addAttributeInfo(attrName.build());
-
         AttributeInfoBuilder attrDefault_project_id = new AttributeInfoBuilder(DEFAULT_PROJECT_ID);
         attrDefault_project_id.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
         userObjClassBuilder.addAttributeInfo(attrDefault_project_id.build());
@@ -67,16 +54,9 @@ public class UserProcessing extends ObjectProcessing {
         attrDomain_id.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
         userObjClassBuilder.addAttributeInfo(attrDomain_id.build());
 
-        AttributeInfoBuilder attrEnabled = new AttributeInfoBuilder(ENABLED);
-        attrEnabled.setRequired(false).setType(Boolean.class).setCreateable(true).setUpdateable(true).setReadable(true);
-        userObjClassBuilder.addAttributeInfo(attrEnabled.build());
-
-//        AttributeInfoBuilder attrPassword = new AttributeInfoBuilder(PASSWORD);
-//        attrPassword.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
-//        userObjClassBuilder.addAttributeInfo(attrPassword.build());
-
         userObjClassBuilder.addAttributeInfo(OperationalAttributeInfos.PASSWORD);
 
+        userObjClassBuilder.addAttributeInfo(OperationalAttributeInfos.ENABLE);
 
         AttributeInfoBuilder attrEmail = new AttributeInfoBuilder(EMAIL);
         attrEmail.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
@@ -99,10 +79,6 @@ public class UserProcessing extends ObjectProcessing {
         attrUserRoles.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
         userObjClassBuilder.addAttributeInfo(attrUserRoles.build());
 
-        AttributeInfoBuilder attrUserToGroup = new AttributeInfoBuilder(USERTOGROUP);
-        attrUserToGroup.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
-        userObjClassBuilder.addAttributeInfo(attrUserToGroup.build());
-
         schemaBuilder.defineObjectClass(userObjClassBuilder.build());
 
 
@@ -111,14 +87,12 @@ public class UserProcessing extends ObjectProcessing {
 
     public Uid createUser(Set<Attribute> attributes) {
         LOG.info("Start createUser, attributes: {0}", attributes);
-
         if (attributes == null || attributes.isEmpty()) {
             throw new InvalidAttributeValueException("attributes not provided or empty");
         }
 
         User user = new KeystoneUser();
         boolean set_required_attribute_name = false;
-
         for (Attribute attribute : attributes) {
             if (attribute.getName().equals(Name.NAME)) {
                 String userName = AttributeUtil.getAsStringValue(attribute);
@@ -133,7 +107,7 @@ public class UserProcessing extends ObjectProcessing {
             if (attribute.getName().equals(DOMAIN_ID)) {
                 user.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute));
             }
-            if (attribute.getName().equals(ENABLED)) {
+            if (attribute.getName().equals(OperationalAttributes.ENABLE_NAME)) {
                 user.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute));
             }
             if (attribute.getName().equals(OperationalAttributes.PASSWORD_NAME)) {
@@ -157,11 +131,17 @@ public class UserProcessing extends ObjectProcessing {
 
         user.toBuilder().build();
         LOG.info("KeystoneUser: {0} ", user);
-
         OSClientV3 os = authenticate(getConfiguration());
-
         User createdUser = os.identity().users().create(user);
         LOG.info("createdKeystoneUser {0}", createdUser);
+        Uid uid = new Uid(createdUser.getId());
+        for (Attribute attribute : attributes) {
+            if (attribute.getName().equals(USERROLES)) {
+                grantUserRoles(attribute, uid);
+            } else if (attribute.getName().equals(USERGROUPS)) {
+                userToGroup(attribute, uid);
+            }
+        }
         return new Uid(createdUser.getId());
     }
 
@@ -172,7 +152,11 @@ public class UserProcessing extends ObjectProcessing {
 
         OSClientV3 os = authenticate(getConfiguration());
         LOG.info("Delete user with UID: {0}", uid.getUidValue());
-        os.identity().users().delete(uid.getUidValue());
+        ActionResponse userDeleteResponse = os.identity().users().delete(uid.getUidValue());
+        if (!userDeleteResponse.isSuccess()) {
+            LOG.info("deleteUser failed!");
+            handleActionResponse(userDeleteResponse);
+        } else LOG.info("deleteUser success!");
 
     }
 
@@ -189,7 +173,7 @@ public class UserProcessing extends ObjectProcessing {
                 if (attribute.getName().equals(DOMAIN_ID)) {
                     user = os.identity().users().update(user.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute)).build());
                 }
-                if (attribute.getName().equals(ENABLED)) {
+                if (attribute.getName().equals(OperationalAttributes.ENABLE_NAME)) {
                     user = os.identity().users().update(user.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute)).build());
                 }
                 if (attribute.getName().equals(Name.NAME)) {
@@ -242,6 +226,7 @@ public class UserProcessing extends ObjectProcessing {
 
                 OSClientV3 os = authenticate(getConfiguration());
                 List<? extends User> users = os.identity().users().getByName(attributeValue);
+
                 for (User user : users) {
                     convertUserToConnectorObject(user, handler, null);
                 }
@@ -272,11 +257,9 @@ public class UserProcessing extends ObjectProcessing {
             ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
             builder.setObjectClass(ObjectClass.ACCOUNT);
             if (user.getId() != null) {
-                //  builder.addAttribute(ID, user.getId());
                 builder.setUid(new Uid(String.valueOf(user.getId())));
             }
             if (user.getName() != null) {
-                //  builder.addAttribute(NAME, user.getName());
                 builder.setName(user.getName());
             }
             if (user.getDefaultProjectId() != null) {
@@ -291,14 +274,13 @@ public class UserProcessing extends ObjectProcessing {
             if (user.getEmail() != null) {
                 builder.addAttribute(EMAIL, user.getEmail());
             }
-//            if (!user.getPassword().isEmpty()){
-//                builder.addAttribute(PASSWORD, user.getPassword());
-//            }
+
             if (user.isEnabled()) {
-                builder.addAttribute(ENABLED, true);
+                builder.addAttribute(OperationalAttributes.ENABLE_NAME, true);
             } else {
-                builder.addAttribute(ENABLED, false);
+                builder.addAttribute(OperationalAttributes.ENABLE_NAME, false);
             }
+
             if (user.getLinks() != null) {
                 builder.addAttribute(LINKS, user.getLinks());
             }
@@ -320,38 +302,148 @@ public class UserProcessing extends ObjectProcessing {
     //Grant a role to a user in a project
     public void grantProjectUserRole(String projectId, String userId, String roleId) {
         OSClient.OSClientV3 os = authenticate(getConfiguration());
-        os.identity().roles().grantProjectUserRole(projectId, userId, roleId);
+        ActionResponse grantProjectUserRoleResponse = os.identity().roles().grantProjectUserRole(projectId, userId, roleId);
+        if (!grantProjectUserRoleResponse.isSuccess()) {
+            LOG.info("grantProjectUserRole failed!");
+            handleActionResponse(grantProjectUserRoleResponse);
+        } else LOG.info("grantProjectUserRole success!");
     }
 
     //Revoke a role from a user in a project
     public void revokeProjectUserRole(String projectId, String userId, String roleUid) {
         OSClient.OSClientV3 os = authenticate(getConfiguration());
-        os.identity().roles().revokeProjectUserRole(projectId, userId, roleUid);
+        ActionResponse revokeProjectUserRoleResponse = os.identity().roles().revokeProjectUserRole(projectId, userId, roleUid);
+        if (!revokeProjectUserRoleResponse.isSuccess()) {
+            LOG.info("revokeProjectUserRole failed!");
+            handleActionResponse(revokeProjectUserRoleResponse);
+        } else LOG.info("revokeProjectUserRole success!");
     }
 
 
     //Grant a role to a user in a domain
     public void grantDomainUserRole(String domainId, String userId, String roleId) {
         OSClient.OSClientV3 os = authenticate(getConfiguration());
-        os.identity().roles().grantDomainUserRole(domainId, userId, roleId);
+        ActionResponse grantDomainUserRoleResponse = os.identity().roles().grantDomainUserRole(domainId, userId, roleId);
+        if (!grantDomainUserRoleResponse.isSuccess()) {
+            LOG.info("grantProjectUserRole failed!");
+            handleActionResponse(grantDomainUserRoleResponse);
+        } else LOG.info("grantProjectUserRole success!");
     }
 
     //Revoke a role from a user in a domain
     public void revokeDomainUserRole(String domainId, String userId, String roleId) {
         OSClient.OSClientV3 os = authenticate(getConfiguration());
-        os.identity().roles().revokeDomainUserRole(domainId, userId, roleId);
+        ActionResponse revokeDomainUserRoleResponse = os.identity().roles().revokeDomainUserRole(domainId, userId, roleId);
+        if (!revokeDomainUserRoleResponse.isSuccess()) {
+            LOG.info("revokeDomainUserRole failed!");
+            handleActionResponse(revokeDomainUserRoleResponse);
+        } else LOG.info("revokeDomainUserRole success!");
+    }
+
+
+    public void grantUserRoles(Attribute attribute, Uid uid) {
+        for (Object v : attribute.getValue()) {
+            LOG.info("value {0}", v);
+            if (!(v instanceof String)) {
+                LOG.error("Not string!");
+            } else {
+                //attribute=projectId:roleId, uid=userId
+                if (((String) v).contains(":")) {
+                    String[] split = ((String) v).split(":");
+                    String projectId = split[0];
+                    String roleId = split[1];
+                    String userId = uid.getUidValue();
+                    LOG.info("projectId: {0}, userId {1}, roleId {2} ", projectId, userId, roleId);
+                    grantProjectUserRole(projectId, userId, roleId);
+                }
+                //attribute=domainId.roleId, uid=userId
+                else if (((String) v).contains(".")) {
+                    String[] split = ((String) v).split(".");
+                    String domainId = split[0];
+                    String roleId = split[1];
+                    String userId = uid.getUidValue();
+                    LOG.info("domainId: {0}, userId {1}, roleId {2} ", domainId, userId, roleId);
+                    grantDomainUserRole(domainId, userId, roleId);
+                }
+            }
+        }
+    }
+
+    public void revokeUserRoles(Attribute attribute, Uid uid) {
+        for (Object v : attribute.getValue()) {
+            LOG.info("value {0}", v);
+            if (!(v instanceof String)) {
+                LOG.error("Not string!");
+            } else {
+                //attribute=projectId:roleId, uid=userId
+                if (((String) v).contains(":")) {
+                    String[] split = ((String) v).split(":");
+                    String projectId = split[0];
+                    String roleId = split[1];
+                    String userId = uid.getUidValue();
+                    LOG.info("projectId: {0}, userId {1}, roleId {2} ", projectId, userId, roleId);
+                    revokeProjectUserRole(projectId, userId, roleId);
+                }
+                //attribute=domainId.roleId, uid=userId
+                else if (((String) v).contains(".")) {
+                    String[] split = ((String) v).split(".");
+                    String domainId = split[0];
+                    String roleId = split[1];
+                    String userId = uid.getUidValue();
+                    LOG.info("domainId: {0}, userId {1}, roleId {2} ", domainId, userId, roleId);
+                    revokeDomainUserRole(domainId, userId, roleId);
+                }
+            }
+        }
+    }
+
+    public void userToGroup(Attribute attribute, Uid uid) {
+        String userId = uid.getUidValue();
+        String groupId;
+        for (Object v : attribute.getValue()) {
+            LOG.info("value {0}", v);
+            if (!(v instanceof String)) {
+                LOG.error("Not string!");
+            } else {
+                groupId = (String) v;
+                addUserToGroup(groupId, userId);
+            }
+        }
+    }
+
+    public void userRemoveFromGroup(Attribute attribute, Uid uid) {
+        String userId = uid.getUidValue();
+        String groupId;
+        for (Object v : attribute.getValue()) {
+            LOG.info("value {0}", v);
+            if (!(v instanceof String)) {
+                LOG.error("Not string!");
+            } else {
+                groupId = (String) v;
+                removeUserFromGroup(groupId, userId);
+            }
+        }
     }
 
     public void addUserToGroup(String groupId, String userId) {
         OSClientV3 os = authenticate(getConfiguration());
         //addUserToGroup("groupId", "userId");
-        os.identity().groups().addUserToGroup(groupId, userId);
-
+        ActionResponse addUserToGroupResponse = os.identity().groups().addUserToGroup(groupId, userId);
+        if (!addUserToGroupResponse.isSuccess()) {
+            LOG.info("addUserToGroup failed!");
+            handleActionResponse(addUserToGroupResponse);
+        } else LOG.info("addUserToGroup success!");
     }
+
 
     public void removeUserFromGroup(String groupId, String userId) {
         OSClientV3 os = authenticate(getConfiguration());
         //removeUserFromGroup("groupId", "userId");
-        os.identity().groups().removeUserFromGroup(groupId, userId);
+        ActionResponse removeUserFromGroupResponse = os.identity().groups().removeUserFromGroup(groupId, userId);
+        if (!removeUserFromGroupResponse.isSuccess()) {
+            LOG.info("removeUserFromGroup failed!");
+            handleActionResponse(removeUserFromGroupResponse);
+        } else LOG.info("removeUserFromGroup success!");
     }
+
 }
