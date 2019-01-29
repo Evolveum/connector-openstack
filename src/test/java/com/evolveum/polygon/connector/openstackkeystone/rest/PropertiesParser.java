@@ -15,7 +15,7 @@ public class PropertiesParser {
 
     private static final Log LOGGER = Log.getLog(PropertiesParser.class);
     private Properties properties;
-    private String FilePath = "../connector-openStack-Keystone/testProperties/propertiesforTest.properties";
+    private String FilePath = "../connector-openstack/testProperties/propertiesforTest.properties";
     private final String ENDPOINT = "endpoint";
     private final String SECRET = "secret";
     private final String PROJECTNAME = "projectName";

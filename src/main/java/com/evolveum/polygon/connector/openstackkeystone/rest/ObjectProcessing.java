@@ -24,7 +24,6 @@ public class ObjectProcessing {
     }
 
     static OSClientV3 authenticate(OpenStackConnectorConfiguration configuration) {
-
         //        # Scoping to a project just by name isn't possible as the project name is only unique within a domain.
         //# You can either use this as the id of the project is unique across domains
         GuardedString guardedString = configuration.getSecret();
@@ -46,7 +45,7 @@ public class ObjectProcessing {
         os.identity().users().list();
     }
 
-    public void handleActionResponse(ActionResponse actionResponse) {
+    void handleActionResponse(ActionResponse actionResponse) {
         int statusCode = actionResponse.getCode();
         String message = actionResponse.getFault();
         LOG.info("HandleActionResponse, statuscode: {0}, message {1}", statusCode, message);

@@ -104,7 +104,7 @@ public class RoleProcessing extends ObjectProcessing {
         if (!deleteRoleResponse.isSuccess()) {
             LOG.info("deleteRole failed!");
             handleActionResponse(deleteRoleResponse);
-        } else LOG.info("deleteRole failed!");
+        } else LOG.info("deleteRole success!");
     }
 
     public void updateRole(Uid uid, Set<Attribute> attributes) {
@@ -174,7 +174,7 @@ public class RoleProcessing extends ObjectProcessing {
     }
 
 
-    protected void invalidAttributeValue(String attrName, Filter query) {
+    private void invalidAttributeValue(String attrName, Filter query) {
         StringBuilder sb = new StringBuilder();
         sb.append("Value of").append(attrName).append("attribute not provided for query: ").append(query);
         throw new InvalidAttributeValueException(sb.toString());

@@ -6,12 +6,15 @@ import org.identityconnectors.framework.common.objects.filter.AttributeFilter;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.FilterBuilder;
 import org.identityconnectors.framework.spi.SearchResultsHandler;
+import org.openstack4j.api.OSClient;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.evolveum.polygon.connector.openstackkeystone.rest.ObjectProcessing.authenticate;
 
 public class UpdateTests extends BasicConfigurationForTests {
 
@@ -107,7 +110,6 @@ public class UpdateTests extends BasicConfigurationForTests {
             openStackConnector.delete(objectClassGroup, groupUid, options);
             openStackConnector.dispose();
         }
-
 
         AttributeFilter filterGroup;
         filterGroup = (EqualsFilter) FilterBuilder.equalTo(groupUid);

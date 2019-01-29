@@ -10,6 +10,8 @@ import org.openstack4j.api.OSClient;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.identity.v3.Group;
+import org.openstack4j.model.identity.v3.Project;
+import org.openstack4j.model.identity.v3.Role;
 import org.openstack4j.model.identity.v3.User;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneGroup;
 
@@ -23,6 +25,10 @@ public class GroupProcessing extends ObjectProcessing {
     private static final String DESCRIPTION = "description";
     private static final String DOMAIN_ID = "domain_id";
     private static final String LINKS = "links";
+
+    private static final String GROUPROLES = "grouproles";
+    private static final String GROUPPROJECTS = "groupprojects";
+
 
     private static final String GROUP_MEMBERS = "group_members";
 
@@ -48,6 +54,15 @@ public class GroupProcessing extends ObjectProcessing {
         AttributeInfoBuilder attrMembers = new AttributeInfoBuilder(GROUP_MEMBERS);
         attrMembers.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
         groupObjClassBuilder.addAttributeInfo(attrMembers.build());
+
+        AttributeInfoBuilder attrGroupRoles = new AttributeInfoBuilder(GROUPROLES);
+        attrGroupRoles.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
+        groupObjClassBuilder.addAttributeInfo(attrGroupRoles.build());
+
+        AttributeInfoBuilder attrGroupProjects = new AttributeInfoBuilder(GROUPPROJECTS);
+        attrGroupProjects.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
+        groupObjClassBuilder.addAttributeInfo(attrGroupProjects.build());
+
 
         //read-only && multi-valued
         AttributeInfoBuilder attrLinks = new AttributeInfoBuilder(LINKS);
@@ -98,7 +113,15 @@ public class GroupProcessing extends ObjectProcessing {
 
         Group createdGroup = os.identity().groups().create(group);
         LOG.info("createdKeystoneGroup {0}", createdGroup);
-        return new Uid(createdGroup.getId());
+        Uid uid = new Uid(createdGroup.getId());
+
+        for (Attribute attribute : attributes) {
+            if (attribute.getName().equals(GROUPROLES)) {
+                grantGroupRoles(attribute, uid);
+            }
+        }
+
+        return uid;
     }
 
     public void deleteGroup(Uid uid) {
@@ -184,7 +207,7 @@ public class GroupProcessing extends ObjectProcessing {
         }
     }
 
-    protected void invalidAttributeValue(String attrName, Filter query) {
+    private void invalidAttributeValue(String attrName, Filter query) {
         StringBuilder sb = new StringBuilder();
         sb.append("Value of").append(attrName).append("attribute not provided for query: ").append(query);
         throw new InvalidAttributeValueException(sb.toString());
@@ -219,6 +242,21 @@ public class GroupProcessing extends ObjectProcessing {
                 builder.addAttribute(GROUP_MEMBERS, usersList);
             }
 
+            OSClientV3 os = authenticate(getConfiguration());
+            List<String> rolesList = new ArrayList<>();
+            List<String> projectsList = new ArrayList<>();
+
+            List<? extends Project> projects = os.identity().projects().list();
+            for (Project project : projects){
+                projectsList.add(project.getId());
+                List<? extends Role> groupRoles =  os.identity().groups().listProjectGroupRoles(group.getId(), project.getId());
+                for (Role groupRole : groupRoles){
+                    rolesList.add(groupRole.getId());
+                }
+            }
+            builder.addAttribute(GROUPROLES, rolesList);
+            builder.addAttribute(GROUPPROJECTS, projectsList);
+
             ConnectorObject connectorObject = builder.build();
             handler.handle(connectorObject);
 
@@ -227,7 +265,7 @@ public class GroupProcessing extends ObjectProcessing {
 
 
     //Grant a role to a group in a project
-    public void grantProjectGroupRole(String projectId, String groupId, String roleId) {
+    private void grantProjectGroupRole(String projectId, String groupId, String roleId) {
         OSClient.OSClientV3 os = authenticate(getConfiguration());
         ActionResponse grantProjectGroupRoleResponse = os.identity().roles().grantProjectGroupRole(projectId, groupId, roleId);
         if (!grantProjectGroupRoleResponse.isSuccess()) {
@@ -237,7 +275,7 @@ public class GroupProcessing extends ObjectProcessing {
     }
 
     //Revoke a role from a group in a project
-    public void revokeProjectGroupRole(String projectId, String groupId, String roleId) {
+    private void revokeProjectGroupRole(String projectId, String groupId, String roleId) {
         OSClient.OSClientV3 os = authenticate(getConfiguration());
         ActionResponse revokeProjectGroupRoleResponse = os.identity().roles().revokeProjectGroupRole(projectId, groupId, roleId);
         if (!revokeProjectGroupRoleResponse.isSuccess()) {
@@ -248,7 +286,7 @@ public class GroupProcessing extends ObjectProcessing {
     }
 
     //Grant a role to a group in a domain
-    public void grantDomainGroupRole(String domainId, String groupId, String roleId) {
+    private void grantDomainGroupRole(String domainId, String groupId, String roleId) {
         OSClient.OSClientV3 os = authenticate(getConfiguration());
         ActionResponse grantDomainGroupRoleResponse = os.identity().roles().grantDomainGroupRole(domainId, groupId, roleId);
         if (!grantDomainGroupRoleResponse.isSuccess()) {
@@ -259,7 +297,7 @@ public class GroupProcessing extends ObjectProcessing {
     }
 
     //Revoke a role from a group in a domain
-    public void revokeDomainGroupRole(String domainId, String groupId, String roleId) {
+    private void revokeDomainGroupRole(String domainId, String groupId, String roleId) {
         OSClient.OSClientV3 os = authenticate(getConfiguration());
         ActionResponse revokeDomainGroupRoleResponse = os.identity().roles().revokeDomainGroupRole(domainId, groupId, roleId);
         if (!revokeDomainGroupRoleResponse.isSuccess()) {

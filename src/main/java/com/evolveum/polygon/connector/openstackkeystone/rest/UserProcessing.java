@@ -12,8 +12,7 @@ import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.common.ActionResponse;
-import org.openstack4j.model.identity.v3.Group;
-import org.openstack4j.model.identity.v3.User;
+import org.openstack4j.model.identity.v3.*;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneUser;
 
 import java.util.ArrayList;
@@ -31,6 +30,7 @@ public class UserProcessing extends ObjectProcessing {
 
     private static final String USERGROUPS = "usergroups";
     private static final String USERROLES = "userroles";
+    private static final String USERPROJECTS = "userprojects";
 
     private static final String LINKS = "links";
 
@@ -78,6 +78,10 @@ public class UserProcessing extends ObjectProcessing {
         AttributeInfoBuilder attrUserRoles = new AttributeInfoBuilder(USERROLES);
         attrUserRoles.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
         userObjClassBuilder.addAttributeInfo(attrUserRoles.build());
+
+        AttributeInfoBuilder attrUserProjects = new AttributeInfoBuilder(USERPROJECTS);
+        attrUserProjects.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true).setMultiValued(true);
+        userObjClassBuilder.addAttributeInfo(attrUserProjects.build());
 
         schemaBuilder.defineObjectClass(userObjClassBuilder.build());
 
@@ -142,7 +146,7 @@ public class UserProcessing extends ObjectProcessing {
                 userToGroup(attribute, uid);
             }
         }
-        return new Uid(createdUser.getId());
+        return uid;
     }
 
     public void deleteUser(Uid uid) {
@@ -211,7 +215,9 @@ public class UserProcessing extends ObjectProcessing {
                 OSClientV3 os = authenticate(getConfiguration());
                 User user = os.identity().users().get(uid.getUidValue());
                 List<? extends Group> listUserGroups = os.identity().users().listUserGroups(uid.getUidValue());
-                convertUserToConnectorObject(user, handler, listUserGroups);
+                List<? extends Project> listUserProjects = os.identity().users().listUserProjects(uid.getUidValue());
+
+                convertUserToConnectorObject(user, handler, listUserGroups, listUserProjects);
 
             } else if (((EqualsFilter) query).getAttribute() instanceof Name) {
                 LOG.info("(((EqualsFilter) query).getAttribute() instanceof Name)");
@@ -226,9 +232,8 @@ public class UserProcessing extends ObjectProcessing {
 
                 OSClientV3 os = authenticate(getConfiguration());
                 List<? extends User> users = os.identity().users().getByName(attributeValue);
-
                 for (User user : users) {
-                    convertUserToConnectorObject(user, handler, null);
+                    convertUserToConnectorObject(user, handler, null,null);
                 }
             }
         } else if (query == null) {
@@ -237,21 +242,20 @@ public class UserProcessing extends ObjectProcessing {
             OSClientV3 os = authenticate(getConfiguration());
             List<? extends User> users = os.identity().users().list();
             for (User user : users) {
-                List<? extends Group> listUserGroups = os.identity().users().listUserGroups(user.getId());
-                convertUserToConnectorObject(user, handler, null);
+                convertUserToConnectorObject(user, handler, null, null);
             }
         }
 
     }
 
 
-    protected void invalidAttributeValue(String attrName, Filter query) {
+    private void invalidAttributeValue(String attrName, Filter query) {
         StringBuilder sb = new StringBuilder();
         sb.append("Value of").append(attrName).append("attribute not provided for query: ").append(query);
         throw new InvalidAttributeValueException(sb.toString());
     }
 
-    public void convertUserToConnectorObject(User user, ResultsHandler handler, List<? extends Group> listUserGroups) {
+    public void convertUserToConnectorObject(User user, ResultsHandler handler, List<? extends Group> listUserGroups, List<? extends Project> listUserProjects) {
         LOG.info("convertRoleToConnectorObject, user: {0}, handler {1}", user, handler);
         if (user != null) {
             ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
@@ -293,6 +297,24 @@ public class UserProcessing extends ObjectProcessing {
                 builder.addAttribute(USERGROUPS, groupsList);
             }
 
+            if (listUserProjects != null){
+                List<String> projectsList = new ArrayList<>(listUserProjects.size());
+                List<String> rolesList = new ArrayList<>();
+
+                OSClientV3 os = authenticate(getConfiguration());
+                for (Project project : listUserProjects){
+                    projectsList.add(project.getId());
+                    //list roles for user in a project
+                    List<? extends Role> userRoles = os.identity().users().listProjectUserRoles(user.getId(),project.getId());
+                    for (Role userRole : userRoles){
+                       rolesList.add(userRole.getId());
+                   }
+                }
+
+                builder.addAttribute(USERROLES, rolesList);
+                builder.addAttribute(USERPROJECTS, projectsList);
+            }
+
             ConnectorObject connectorObject = builder.build();
             handler.handle(connectorObject);
 
@@ -300,7 +322,7 @@ public class UserProcessing extends ObjectProcessing {
     }
 
     //Grant a role to a user in a project
-    public void grantProjectUserRole(String projectId, String userId, String roleId) {
+    private void grantProjectUserRole(String projectId, String userId, String roleId) {
         OSClient.OSClientV3 os = authenticate(getConfiguration());
         ActionResponse grantProjectUserRoleResponse = os.identity().roles().grantProjectUserRole(projectId, userId, roleId);
         if (!grantProjectUserRoleResponse.isSuccess()) {
@@ -310,7 +332,7 @@ public class UserProcessing extends ObjectProcessing {
     }
 
     //Revoke a role from a user in a project
-    public void revokeProjectUserRole(String projectId, String userId, String roleUid) {
+    private void revokeProjectUserRole(String projectId, String userId, String roleUid) {
         OSClient.OSClientV3 os = authenticate(getConfiguration());
         ActionResponse revokeProjectUserRoleResponse = os.identity().roles().revokeProjectUserRole(projectId, userId, roleUid);
         if (!revokeProjectUserRoleResponse.isSuccess()) {
@@ -321,7 +343,7 @@ public class UserProcessing extends ObjectProcessing {
 
 
     //Grant a role to a user in a domain
-    public void grantDomainUserRole(String domainId, String userId, String roleId) {
+    private void grantDomainUserRole(String domainId, String userId, String roleId) {
         OSClient.OSClientV3 os = authenticate(getConfiguration());
         ActionResponse grantDomainUserRoleResponse = os.identity().roles().grantDomainUserRole(domainId, userId, roleId);
         if (!grantDomainUserRoleResponse.isSuccess()) {
@@ -331,7 +353,7 @@ public class UserProcessing extends ObjectProcessing {
     }
 
     //Revoke a role from a user in a domain
-    public void revokeDomainUserRole(String domainId, String userId, String roleId) {
+    private void revokeDomainUserRole(String domainId, String userId, String roleId) {
         OSClient.OSClientV3 os = authenticate(getConfiguration());
         ActionResponse revokeDomainUserRoleResponse = os.identity().roles().revokeDomainUserRole(domainId, userId, roleId);
         if (!revokeDomainUserRoleResponse.isSuccess()) {
@@ -425,7 +447,7 @@ public class UserProcessing extends ObjectProcessing {
         }
     }
 
-    public void addUserToGroup(String groupId, String userId) {
+    private void addUserToGroup(String groupId, String userId) {
         OSClientV3 os = authenticate(getConfiguration());
         //addUserToGroup("groupId", "userId");
         ActionResponse addUserToGroupResponse = os.identity().groups().addUserToGroup(groupId, userId);
@@ -436,7 +458,7 @@ public class UserProcessing extends ObjectProcessing {
     }
 
 
-    public void removeUserFromGroup(String groupId, String userId) {
+    private void removeUserFromGroup(String groupId, String userId) {
         OSClientV3 os = authenticate(getConfiguration());
         //removeUserFromGroup("groupId", "userId");
         ActionResponse removeUserFromGroupResponse = os.identity().groups().removeUserFromGroup(groupId, userId);
@@ -445,5 +467,6 @@ public class UserProcessing extends ObjectProcessing {
             handleActionResponse(removeUserFromGroupResponse);
         } else LOG.info("removeUserFromGroup success!");
     }
+
 
 }

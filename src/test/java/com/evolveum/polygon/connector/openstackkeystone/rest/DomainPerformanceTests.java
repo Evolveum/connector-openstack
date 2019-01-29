@@ -65,15 +65,15 @@ public class DomainPerformanceTests extends BasicConfigurationForTests {
 
     @Test(priority = 34)
     public void Delete500GDomainTest() {
-        OpenStackConnector gitlabRestConnector = new OpenStackConnector();
+        OpenStackConnector openStackConnector = new OpenStackConnector();
         OpenStackConnectorConfiguration configuration = getConfiguration();
         ObjectClass objectClassDomain = new ObjectClass("Domain");
         OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         for (Uid domain : domainsUid) {
-            gitlabRestConnector.init(configuration);
-            gitlabRestConnector.delete(objectClassDomain, domain, options);
-            gitlabRestConnector.dispose();
+            openStackConnector.init(configuration);
+            openStackConnector.delete(objectClassDomain, domain, options);
+            openStackConnector.dispose();
         }
     }
 

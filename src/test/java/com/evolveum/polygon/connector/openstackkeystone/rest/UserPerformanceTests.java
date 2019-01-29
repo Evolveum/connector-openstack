@@ -84,13 +84,17 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
 
         OpenStackConnectorConfiguration configuration = getConfiguration();
         OperationOptions options = new OperationOptions(new HashMap<String, Object>());
-        ObjectClass objectClassGroup = ObjectClass.GROUP;
+        ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
+        Set<Attribute> simbaAttributeUid = new HashSet<Attribute>();
+        simbaAttributeUid.add(AttributeBuilder.build("usergroups", prideRockUid.getUidValue()));
 
-        Set<Attribute> usersUidAttributes = new HashSet<Attribute>(usersUid);
+        for (Uid userUid : usersUid){
+            openStackConnector.init(configuration);
+            openStackConnector.addAttributeValues(objectClassAccount, userUid, simbaAttributeUid , options);
+            openStackConnector.dispose();
+        }
 
-        openStackConnector.init(configuration);
-        openStackConnector.addAttributeValues(objectClassGroup, prideRockUid, usersUidAttributes, options);
-        openStackConnector.dispose();
+
     }
 
 

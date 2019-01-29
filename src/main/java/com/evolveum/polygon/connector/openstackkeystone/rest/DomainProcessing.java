@@ -176,7 +176,7 @@ public class DomainProcessing extends ObjectProcessing {
     }
 
 
-    protected void invalidAttributeValue(String attrName, Filter query) {
+    private void invalidAttributeValue(String attrName, Filter query) {
         StringBuilder sb = new StringBuilder();
         sb.append("Value of").append(attrName).append("attribute not provided for query: ").append(query);
         throw new InvalidAttributeValueException(sb.toString());
