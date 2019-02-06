@@ -52,31 +52,31 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
     }
 
 
-//    @Test(priority = 21)
-//    public void Update500UsersTest() {
-//        OpenStackConnector openStackConnector = new OpenStackConnector();
-//
-//        OpenStackConnectorConfiguration configuration = getConfiguration();
-//
-//        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
-//
-//        ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
-//
-//        int i = 0;
-//        for (Uid user : usersUid) {
-//            Set<Attribute> attributesUpdateAccount = new HashSet<Attribute>();
-//            attributesUpdateAccount.add(AttributeBuilder.build("description", "The Lion King - updated"));
-//            attributesUpdateAccount.add(AttributeBuilder.build("__ENABLE__", false));
-//            attributesUpdateAccount.add(AttributeBuilder.build("__NAME__", "Kovu" + i));
-//            attributesUpdateAccount.add(AttributeBuilder.build("email", "kovu@lion.com"));
-//
-//            openStackConnector.init(configuration);
-//            openStackConnector.update(objectClassAccount, user, attributesUpdateAccount, options);
-//            openStackConnector.dispose();
-//            i++;
-//        }
-//
-//    }
+    @Test(priority = 21)
+    public void Update500UsersTest() {
+        OpenStackConnector openStackConnector = new OpenStackConnector();
+
+        OpenStackConnectorConfiguration configuration = getConfiguration();
+
+        OperationOptions options = new OperationOptions(new HashMap<String, Object>());
+
+        ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
+
+        int i = 0;
+        for (Uid user : usersUid) {
+            Set<Attribute> attributesUpdateAccount = new HashSet<Attribute>();
+            attributesUpdateAccount.add(AttributeBuilder.build("description", "The Lion King - updated"));
+            attributesUpdateAccount.add(AttributeBuilder.build("__ENABLE__", false));
+            attributesUpdateAccount.add(AttributeBuilder.build("__NAME__", "Kovu" + i));
+            attributesUpdateAccount.add(AttributeBuilder.build("email", "kovu@lion.com"));
+
+            openStackConnector.init(configuration);
+            openStackConnector.update(objectClassAccount, user, attributesUpdateAccount, options);
+            openStackConnector.dispose();
+            i++;
+        }
+
+    }
 
     @Test(priority = 22)
     public void CreateMembershipToGroupFor500UsersTest() {
