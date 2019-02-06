@@ -12,7 +12,10 @@ import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.common.ActionResponse;
-import org.openstack4j.model.identity.v3.*;
+import org.openstack4j.model.identity.v3.Group;
+import org.openstack4j.model.identity.v3.Project;
+import org.openstack4j.model.identity.v3.Role;
+import org.openstack4j.model.identity.v3.User;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneUser;
 
 import java.util.ArrayList;
@@ -204,6 +207,7 @@ public class UserProcessing extends ObjectProcessing {
         if (query instanceof EqualsFilter) {
             LOG.info("query instanceof EqualsFilter");
             if (((EqualsFilter) query).getAttribute() instanceof Uid) {
+
                 LOG.info("((EqualsFilter) query).getAttribute() instanceof Uid");
 
                 Uid uid = (Uid) ((EqualsFilter) query).getAttribute();
@@ -213,6 +217,7 @@ public class UserProcessing extends ObjectProcessing {
                 }
 
                 OSClientV3 os = authenticate(getConfiguration());
+
                 User user = os.identity().users().get(uid.getUidValue());
                 List<? extends Group> listUserGroups = os.identity().users().listUserGroups(uid.getUidValue());
                 List<? extends Project> listUserProjects = os.identity().users().listUserProjects(uid.getUidValue());
@@ -233,7 +238,7 @@ public class UserProcessing extends ObjectProcessing {
                 OSClientV3 os = authenticate(getConfiguration());
                 List<? extends User> users = os.identity().users().getByName(attributeValue);
                 for (User user : users) {
-                    convertUserToConnectorObject(user, handler, null,null);
+                    convertUserToConnectorObject(user, handler, null, null);
                 }
             }
         } else if (query == null) {
@@ -256,7 +261,7 @@ public class UserProcessing extends ObjectProcessing {
     }
 
     public void convertUserToConnectorObject(User user, ResultsHandler handler, List<? extends Group> listUserGroups, List<? extends Project> listUserProjects) {
-        LOG.info("convertRoleToConnectorObject, user: {0}, handler {1}", user, handler);
+        LOG.info("convertUserToConnectorObject, user: {0}, handler {1}", user, handler);
         if (user != null) {
             ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
             builder.setObjectClass(ObjectClass.ACCOUNT);
@@ -297,18 +302,18 @@ public class UserProcessing extends ObjectProcessing {
                 builder.addAttribute(USERGROUPS, groupsList);
             }
 
-            if (listUserProjects != null){
+            if (listUserProjects != null) {
                 List<String> projectsList = new ArrayList<>(listUserProjects.size());
                 List<String> rolesList = new ArrayList<>();
 
                 OSClientV3 os = authenticate(getConfiguration());
-                for (Project project : listUserProjects){
+                for (Project project : listUserProjects) {
                     projectsList.add(project.getId());
                     //list roles for user in a project
-                    List<? extends Role> userRoles = os.identity().users().listProjectUserRoles(user.getId(),project.getId());
-                    for (Role userRole : userRoles){
-                       rolesList.add(userRole.getId());
-                   }
+                    List<? extends Role> userRoles = os.identity().users().listProjectUserRoles(user.getId(), project.getId());
+                    for (Role userRole : userRoles) {
+                        rolesList.add(userRole.getId());
+                    }
                 }
 
                 builder.addAttribute(USERROLES, rolesList);

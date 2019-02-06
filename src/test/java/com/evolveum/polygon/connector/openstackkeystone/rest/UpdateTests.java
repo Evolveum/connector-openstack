@@ -6,15 +6,12 @@ import org.identityconnectors.framework.common.objects.filter.AttributeFilter;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.FilterBuilder;
 import org.identityconnectors.framework.spi.SearchResultsHandler;
-import org.openstack4j.api.OSClient;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-
-import static com.evolveum.polygon.connector.openstackkeystone.rest.ObjectProcessing.authenticate;
 
 public class UpdateTests extends BasicConfigurationForTests {
 
@@ -31,7 +28,7 @@ public class UpdateTests extends BasicConfigurationForTests {
 
         Set<Attribute> attributesCreateAccount = new HashSet<Attribute>();
         attributesCreateAccount.add(AttributeBuilder.build("description", "The Lion King"));
-        attributesCreateAccount.add(AttributeBuilder.build("enabled", true));
+        attributesCreateAccount.add(AttributeBuilder.build("__ENABLE__", true));
         attributesCreateAccount.add(AttributeBuilder.build("domain_id", "default"));
         attributesCreateAccount.add(AttributeBuilder.build("__NAME__", "Kiara"));
         attributesCreateAccount.add(AttributeBuilder.build("default_project_id", "project"));
@@ -41,7 +38,7 @@ public class UpdateTests extends BasicConfigurationForTests {
 
         Set<Attribute> attributesUpdateAccount = new HashSet<Attribute>();
         attributesUpdateAccount.add(AttributeBuilder.build("description", "The Lion King - updated"));
-        attributesUpdateAccount.add(AttributeBuilder.build("enabled", false));
+        attributesUpdateAccount.add(AttributeBuilder.build("__ENABLE__", false));
         attributesUpdateAccount.add(AttributeBuilder.build("__NAME__", "Kovu"));
         attributesUpdateAccount.add(AttributeBuilder.build("email", "kovu@lion.com"));
 
@@ -72,6 +69,7 @@ public class UpdateTests extends BasicConfigurationForTests {
 
         openStackConnector.executeQuery(objectClassAccount, filterAccount, handlerAccount, options);
 
+
         try {
             if (!resultsAccount.get(0).getAttributes().containsAll(attributesUpdateAccount)) {
                 throw new InvalidAttributeValueException("Attributes of created user and searched user is not same.");
@@ -80,6 +78,7 @@ public class UpdateTests extends BasicConfigurationForTests {
             openStackConnector.delete(objectClassAccount, accountUid, options);
             openStackConnector.dispose();
         }
+
     }
 
     @Test
@@ -152,7 +151,7 @@ public class UpdateTests extends BasicConfigurationForTests {
 
         Set<Attribute> attributesCreateDomain = new HashSet<Attribute>();
         attributesCreateDomain.add(AttributeBuilder.build("description", "The Lion King"));
-        attributesCreateDomain.add(AttributeBuilder.build("enabled", true));
+        attributesCreateDomain.add(AttributeBuilder.build("__ENABLE__", true));
         attributesCreateDomain.add(AttributeBuilder.build("__NAME__", "Ed Domain"));
 
 
@@ -161,7 +160,7 @@ public class UpdateTests extends BasicConfigurationForTests {
         Set<Attribute> attributesUpdateDomain = new HashSet<Attribute>();
         attributesUpdateDomain.add(AttributeBuilder.build("description", "The Lion King - updated"));
         attributesUpdateDomain.add(AttributeBuilder.build("__NAME__", "Gopher Group"));
-        attributesUpdateDomain.add(AttributeBuilder.build("enabled", false));
+        attributesUpdateDomain.add(AttributeBuilder.build("__ENABLE__", false));
 
         try {
             openStackConnector.update(objectClassDomain, domainUid, attributesUpdateDomain, options);
@@ -213,7 +212,7 @@ public class UpdateTests extends BasicConfigurationForTests {
 
         Set<Attribute> attributesCreateProject = new HashSet<Attribute>();
         attributesCreateProject.add(AttributeBuilder.build("description", "The Lion King"));
-        attributesCreateProject.add(AttributeBuilder.build("enabled", true));
+        attributesCreateProject.add(AttributeBuilder.build("__ENABLE__", true));
         attributesCreateProject.add(AttributeBuilder.build("__NAME__", "Ed Project"));
         attributesCreateProject.add(AttributeBuilder.build("domain_id", "default"));
 
@@ -223,7 +222,7 @@ public class UpdateTests extends BasicConfigurationForTests {
         Set<Attribute> attributesUpdateProject = new HashSet<Attribute>();
         attributesUpdateProject.add(AttributeBuilder.build("description", "The Lion King - updated"));
         attributesUpdateProject.add(AttributeBuilder.build("__NAME__", "Gopher Group"));
-        attributesUpdateProject.add(AttributeBuilder.build("enabled", false));
+        attributesUpdateProject.add(AttributeBuilder.build("__ENABLE__", false));
 
         try {
             openStackConnector.update(objectClassProject, projectUid, attributesUpdateProject, options);

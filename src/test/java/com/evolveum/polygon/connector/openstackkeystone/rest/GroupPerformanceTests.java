@@ -9,7 +9,10 @@ import org.identityconnectors.framework.common.objects.filter.FilterBuilder;
 import org.identityconnectors.framework.spi.SearchResultsHandler;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class GroupPerformanceTests extends BasicConfigurationForTests {
@@ -85,8 +88,8 @@ public class GroupPerformanceTests extends BasicConfigurationForTests {
         simbaUid = openStackConnector.create(objectClassAccount, attributesAccount, options);
         openStackConnector.dispose();
 
-        Set<String> grupsUidList= new HashSet<>();
-        for (Uid groupUid : groupsUid){
+        Set<String> grupsUidList = new HashSet<>();
+        for (Uid groupUid : groupsUid) {
             grupsUidList.add(groupUid.getUidValue());
         }
         Set<Attribute> simbaAttributeUid = new HashSet<Attribute>();

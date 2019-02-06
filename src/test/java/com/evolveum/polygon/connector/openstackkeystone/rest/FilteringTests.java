@@ -28,7 +28,7 @@ public class FilteringTests extends BasicConfigurationForTests {
 
         Set<Attribute> attributesFirstCreateAccount = new HashSet<Attribute>();
         attributesFirstCreateAccount.add(AttributeBuilder.build("description", "The Lion King"));
-        attributesFirstCreateAccount.add(AttributeBuilder.build("enabled", true));
+        attributesFirstCreateAccount.add(AttributeBuilder.build("__ENABLE__", true));
         attributesFirstCreateAccount.add(AttributeBuilder.build("domain_id", "default"));
         attributesFirstCreateAccount.add(AttributeBuilder.build("__NAME__", "Simba"));
         attributesFirstCreateAccount.add(AttributeBuilder.build("default_project_id", "project"));
@@ -40,7 +40,7 @@ public class FilteringTests extends BasicConfigurationForTests {
 
         Set<Attribute> attributesSecondCreateAccount = new HashSet<Attribute>();
         attributesSecondCreateAccount.add(AttributeBuilder.build("description", "The Lion King"));
-        attributesSecondCreateAccount.add(AttributeBuilder.build("enabled", true));
+        attributesSecondCreateAccount.add(AttributeBuilder.build("__ENABLE__", true));
         attributesSecondCreateAccount.add(AttributeBuilder.build("domain_id", "default"));
         attributesSecondCreateAccount.add(AttributeBuilder.build("__NAME__", "Scar"));
         attributesSecondCreateAccount.add(AttributeBuilder.build("default_project_id", "project"));
@@ -182,14 +182,14 @@ public class FilteringTests extends BasicConfigurationForTests {
         Set<Attribute> attributesFirstCreateDomain = new HashSet<Attribute>();
         attributesFirstCreateDomain.add(AttributeBuilder.build("description", "The Lion King"));
         attributesFirstCreateDomain.add(AttributeBuilder.build("__NAME__", "Nala Domain"));
-        attributesFirstCreateDomain.add(AttributeBuilder.build("enabled", false));
+        attributesFirstCreateDomain.add(AttributeBuilder.build("__ENABLE__", false));
 
         Uid nalaDomainUid = openStackConnector.create(objectClassDomain, attributesFirstCreateDomain, options);
 
         Set<Attribute> attributesSecondCreateDomain = new HashSet<Attribute>();
         attributesSecondCreateDomain.add(AttributeBuilder.build("description", "The Lion King"));
         attributesSecondCreateDomain.add(AttributeBuilder.build("__NAME__", "Musafa Domain"));
-        attributesSecondCreateDomain.add(AttributeBuilder.build("enabled", false));
+        attributesSecondCreateDomain.add(AttributeBuilder.build("__ENABLE__", false));
 
         Uid musafaDomainUid = openStackConnector.create(objectClassDomain, attributesSecondCreateDomain, options);
 
@@ -254,7 +254,7 @@ public class FilteringTests extends BasicConfigurationForTests {
         Set<Attribute> attributesFirstCreateProject = new HashSet<Attribute>();
         attributesFirstCreateProject.add(AttributeBuilder.build("description", "The Lion King"));
         attributesFirstCreateProject.add(AttributeBuilder.build("__NAME__", "Zazu Project"));
-        attributesFirstCreateProject.add(AttributeBuilder.build("enabled", true));
+        attributesFirstCreateProject.add(AttributeBuilder.build("__ENABLE__", true));
         attributesFirstCreateProject.add(AttributeBuilder.build("domain_id", "default"));
         attributesFirstCreateProject.add(AttributeBuilder.build("parent_id", "default"));
 
@@ -263,7 +263,7 @@ public class FilteringTests extends BasicConfigurationForTests {
         Set<Attribute> attributesSecondCreateProject = new HashSet<Attribute>();
         attributesSecondCreateProject.add(AttributeBuilder.build("description", "The Lion King"));
         attributesSecondCreateProject.add(AttributeBuilder.build("__NAME__", "Rafiki Project"));
-        attributesSecondCreateProject.add(AttributeBuilder.build("enabled", true));
+        attributesSecondCreateProject.add(AttributeBuilder.build("__ENABLE__", true));
         attributesSecondCreateProject.add(AttributeBuilder.build("domain_id", "default"));
         attributesSecondCreateProject.add(AttributeBuilder.build("parent_id", "default"));
 

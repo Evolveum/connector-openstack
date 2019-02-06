@@ -17,7 +17,7 @@ public class PropertiesParser {
     private Properties properties;
     private String FilePath = "../connector-openstack/testProperties/propertiesforTest.properties";
     private final String ENDPOINT = "endpoint";
-    private final String SECRET = "secret";
+    private final String PASSOWRD = "password";
     private final String PROJECTNAME = "projectName";
     private final String USERID = "userId";
     private final String DOMAINNAME = "domainName";
@@ -49,7 +49,7 @@ public class PropertiesParser {
     }
 
     public GuardedString getSecret() {
-        return new GuardedString(((String) properties.get(SECRET)).toCharArray());
+        return new GuardedString(((String) properties.get(PASSOWRD)).toCharArray());
     }
 
     public String getProjectName() {

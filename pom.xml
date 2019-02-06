@@ -27,7 +27,7 @@
     </parent>
 
     <artifactId>connector-openStack-Keystone</artifactId>
-    <version>0.41</version>
+    <version>0.54</version>
     <packaging>jar</packaging>
 
     <name>OpenStackConnector</name>

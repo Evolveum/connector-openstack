@@ -125,7 +125,7 @@ public class grantAndRevokeRolesTests extends BasicConfigurationForTests {
             List<? extends Role> userRoles = os.identity().groups().listProjectGroupRoles(groupId.getUidValue(), projectUid.getUidValue());
             Assert.assertFalse(userRoles.isEmpty());
 
-            //revokeProjectUserRole
+            //revokeProjectGroupRole
             openStackConnector.init(configuration);
             openStackConnector.removeAttributeValues(objectClassGroup, groupId, projectGroupRoleAttribute, options);
             openStackConnector.dispose();

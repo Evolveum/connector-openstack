@@ -181,7 +181,7 @@ public class SchemaConsistencyTests extends BasicConfigurationForTests {
         } finally {
             //to delete domain must disable first
             Set<Attribute> attributesAccount3 = new HashSet<>();
-            attributesAccount3.add(AttributeBuilder.build("enabled", false));
+            attributesAccount3.add(AttributeBuilder.build("__ENABLE__", false));
             openStackConnector.update(objectClassDomain, uidDomain, attributesAccount3, options);
 
             openStackConnector.delete(objectClassDomain, uidDomain, options);

@@ -246,12 +246,14 @@ public class GroupProcessing extends ObjectProcessing {
             List<String> rolesList = new ArrayList<>();
             List<String> projectsList = new ArrayList<>();
 
+
             List<? extends Project> projects = os.identity().projects().list();
-            for (Project project : projects){
-                projectsList.add(project.getId());
-                List<? extends Role> groupRoles =  os.identity().groups().listProjectGroupRoles(group.getId(), project.getId());
-                for (Role groupRole : groupRoles){
+            for (Project project : projects) {
+                //list roles for group in a project
+                List<? extends Role> groupRoles = os.identity().groups().listProjectGroupRoles(group.getId(), project.getId());
+                for (Role groupRole : groupRoles) {
                     rolesList.add(groupRole.getId());
+                    projectsList.add(project.getId());
                 }
             }
             builder.addAttribute(GROUPROLES, rolesList);

@@ -27,7 +27,7 @@ public class ConfigurationValidityTests extends BasicConfigurationForTests {
 
         OpenStackConnectorConfiguration conf = getConfiguration();
         GuardedString pass = new GuardedString("".toCharArray());
-        conf.setSecret(pass);
+        conf.setPassword(pass);
         openStackConnector.init(conf);
         try {
             openStackConnector.test();

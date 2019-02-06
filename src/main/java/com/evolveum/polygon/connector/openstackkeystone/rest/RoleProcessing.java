@@ -143,6 +143,7 @@ public class RoleProcessing extends ObjectProcessing {
                 Role role = os.identity().roles().get(uid.getUidValue());
                 convertRoleToConnectorObject(role, handler);
 
+
             } else if (((EqualsFilter) query).getAttribute() instanceof Name) {
                 LOG.info("((EqualsFilter) query).getAttribute().equals(\"name\")");
 
@@ -199,8 +200,8 @@ public class RoleProcessing extends ObjectProcessing {
             }
 
             ConnectorObject connectorObject = builder.build();
+            LOG.info("connectorObject is : {0} ", connectorObject);
             handler.handle(connectorObject);
-
         } else throw new UnknownUidException("Returned Role object is null");
     }
 }

@@ -26,7 +26,7 @@ public class ProjectPerformanceTests extends BasicConfigurationForTests {
 
             Set<Attribute> attributesCreateProject = new HashSet<Attribute>();
             attributesCreateProject.add(AttributeBuilder.build("description", "The Lion King"));
-            attributesCreateProject.add(AttributeBuilder.build("enabled", true));
+            attributesCreateProject.add(AttributeBuilder.build("__ENABLE__", true));
             attributesCreateProject.add(AttributeBuilder.build("__NAME__", "Nala project" + i));
             attributesCreateProject.add(AttributeBuilder.build("domain_id", "default"));
 

@@ -17,11 +17,11 @@ public class OpenStackConnectorConfiguration extends AbstractConfiguration
 
     private String endpoint;
     private String userId;
-    private GuardedString secret;
+    private GuardedString password;
     private String projectName;
     private String domainName;
 
-    @ConfigurationProperty(order = 1, displayMessageKey = "endpoint", required = true)
+    @ConfigurationProperty(order = 1, displayMessageKey = "Endpoint", helpMessageKey = "e.g. http://127.0.0.1:5000/v3", required = true)
     public String getEndpoint() {
         return endpoint;
     }
@@ -30,7 +30,7 @@ public class OpenStackConnectorConfiguration extends AbstractConfiguration
         this.endpoint = endpoint;
     }
 
-    @ConfigurationProperty(order = 2, displayMessageKey = "credentials - user ID", required = true)
+    @ConfigurationProperty(order = 2, displayMessageKey = "User ID", required = true)
     public String getUserId() {
         return userId;
     }
@@ -39,16 +39,16 @@ public class OpenStackConnectorConfiguration extends AbstractConfiguration
         this.userId = userId;
     }
 
-    @ConfigurationProperty(order = 3, displayMessageKey = "credentials - secret", required = true)
-    public GuardedString getSecret() {
-        return secret;
+    @ConfigurationProperty(order = 3, displayMessageKey = "User password", required = true)
+    public GuardedString getPassword() {
+        return password;
     }
 
-    public void setSecret(GuardedString secret) {
-        this.secret = secret;
+    public void setPassword(GuardedString password) {
+        this.password = password;
     }
 
-    @ConfigurationProperty(order = 4, displayMessageKey = "Project name", required = true)
+    @ConfigurationProperty(order = 4, displayMessageKey = "Project name", helpMessageKey = "e.g. admin", required = true)
     public String getProjectName() {
         return projectName;
     }
@@ -57,7 +57,7 @@ public class OpenStackConnectorConfiguration extends AbstractConfiguration
         this.projectName = projectName;
     }
 
-    @ConfigurationProperty(order = 5, displayMessageKey = "Domain name", required = true)
+    @ConfigurationProperty(order = 5, displayMessageKey = "Domain name", helpMessageKey = "e.g. Default", required = true)
     public String getDomainName() {
         return domainName;
     }
@@ -78,9 +78,9 @@ public class OpenStackConnectorConfiguration extends AbstractConfiguration
             throw new ConfigurationException("userId cannot be empty.");
         }
         GuardedStringAccessor accessor = new GuardedStringAccessor();
-        secret.access(accessor);
+        password.access(accessor);
         if ("".equals(accessor.getClearString())) {
-            throw new ConfigurationException("secret cannot be empty.");
+            throw new ConfigurationException("password cannot be empty.");
         }
         if (StringUtil.isBlank(projectName)) {
             throw new ConfigurationException("projectName cannot be empty.");
@@ -99,7 +99,7 @@ public class OpenStackConnectorConfiguration extends AbstractConfiguration
 
         this.endpoint = null;
         this.userId = null;
-        this.secret.dispose();
+        this.password.dispose();
         this.projectName = null;
         this.domainName = null;
 
