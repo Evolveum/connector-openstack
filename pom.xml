@@ -27,7 +27,7 @@
     </parent>
 
     <artifactId>connector-openStack-Keystone</artifactId>
-    <version>0.32</version>
+    <version>0.55</version>
     <packaging>jar</packaging>
 
     <name>OpenStackConnector</name>
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>org.pacesys</groupId>
             <artifactId>openstack4j</artifactId>
-            <version>3.1.0</version>
+            <version>3.2.0</version>
         </dependency>
 
 

@@ -9,7 +9,10 @@ import org.identityconnectors.framework.common.objects.filter.FilterBuilder;
 import org.identityconnectors.framework.spi.SearchResultsHandler;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class GroupPerformanceTests extends BasicConfigurationForTests {
@@ -67,7 +70,7 @@ public class GroupPerformanceTests extends BasicConfigurationForTests {
 
     @Test(priority = 32)
     public void CreateUserAndAddUserToEachGroupTest() {
-        OpenStackConnector gitlabRestConnector = new OpenStackConnector();
+        OpenStackConnector openStackConnector = new OpenStackConnector();
 
         OpenStackConnectorConfiguration configuration = getConfiguration();
         OperationOptions options = new OperationOptions(new HashMap<String, Object>());
@@ -81,15 +84,21 @@ public class GroupPerformanceTests extends BasicConfigurationForTests {
         attributesAccount.add(AttributeBuilder.build("__PASSWORD__", pass));
         attributesAccount.add(AttributeBuilder.build("__NAME__", "Simba King"));
 
-        gitlabRestConnector.init(configuration);
-        simbaUid = gitlabRestConnector.create(objectClassAccount, attributesAccount, options);
-        gitlabRestConnector.dispose();
-        Set<Attribute> simbaAttributeUid = new HashSet<Attribute>(Collections.singleton(simbaUid));
+        openStackConnector.init(configuration);
+        simbaUid = openStackConnector.create(objectClassAccount, attributesAccount, options);
+        openStackConnector.dispose();
+
+        Set<String> grupsUidList = new HashSet<>();
         for (Uid groupUid : groupsUid) {
-            gitlabRestConnector.init(configuration);
-            gitlabRestConnector.addAttributeValues(objectClassGroup, groupUid, simbaAttributeUid, options);
-            gitlabRestConnector.dispose();
+            grupsUidList.add(groupUid.getUidValue());
         }
+        Set<Attribute> simbaAttributeUid = new HashSet<Attribute>();
+        simbaAttributeUid.add(AttributeBuilder.build("usergroups", grupsUidList));
+
+        openStackConnector.init(configuration);
+        openStackConnector.addAttributeValues(objectClassAccount, simbaUid, simbaAttributeUid, options);
+        openStackConnector.dispose();
+
     }
 
 
@@ -122,8 +131,6 @@ public class GroupPerformanceTests extends BasicConfigurationForTests {
         openStackConnector.executeQuery(objectClassAccount, equalsFilter, handlerUser, options);
         openStackConnector.dispose();
 
-        System.out.println(resultsUser.get(0).getAttributes());
-
         if (resultsUser.size() == 0 || resultsUser.get(0).getAttributeByName("usergroups") == null || resultsUser.get(0).getAttributeByName("usergroups").getValue().size() != 500) {
             throw new InvalidAttributeValueException("Group doesn't 500 members.");
         }
@@ -131,21 +138,21 @@ public class GroupPerformanceTests extends BasicConfigurationForTests {
 
     @Test(priority = 34)
     public void Delete500GroupAndUserTest() {
-        OpenStackConnector gitlabRestConnector = new OpenStackConnector();
+        OpenStackConnector openStackConnector = new OpenStackConnector();
         OpenStackConnectorConfiguration configuration = getConfiguration();
         ObjectClass objectClassGroup = ObjectClass.GROUP;
         ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
         OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         for (Uid group : groupsUid) {
-            gitlabRestConnector.init(configuration);
-            gitlabRestConnector.delete(objectClassGroup, group, options);
-            gitlabRestConnector.dispose();
+            openStackConnector.init(configuration);
+            openStackConnector.delete(objectClassGroup, group, options);
+            openStackConnector.dispose();
         }
 
-        gitlabRestConnector.init(configuration);
-        gitlabRestConnector.delete(objectClassAccount, simbaUid, options);
-        gitlabRestConnector.dispose();
+        openStackConnector.init(configuration);
+        openStackConnector.delete(objectClassAccount, simbaUid, options);
+        openStackConnector.dispose();
 
 
     }

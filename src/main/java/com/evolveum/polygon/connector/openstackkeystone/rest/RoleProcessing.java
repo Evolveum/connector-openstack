@@ -7,6 +7,7 @@ import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.openstack4j.api.OSClient;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.identity.v3.Role;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneRole;
 
@@ -15,9 +16,6 @@ import java.util.Set;
 
 
 public class RoleProcessing extends ObjectProcessing {
-
-    //required
-    private static final String NAME = "name";
 
     //optional
     private static final String DESCRIPTION = "description"; //not supported in openstack4j api
@@ -37,11 +35,6 @@ public class RoleProcessing extends ObjectProcessing {
 
         roleObjClassBuilder.setType(ROLE_NAME);
 
-//        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
-//        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
-//        roleObjClassBuilder.addAttributeInfo(attrName.build());
-
-
         AttributeInfoBuilder attrDomain_id = new AttributeInfoBuilder(DOMAIN_ID);
         attrDomain_id.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
         roleObjClassBuilder.addAttributeInfo(attrDomain_id.build());
@@ -53,7 +46,7 @@ public class RoleProcessing extends ObjectProcessing {
 
         //read-only && multi-valued
         AttributeInfoBuilder attrLinks = new AttributeInfoBuilder(LINKS);
-            attrLinks.setRequired(false).setType(String.class).setCreateable(false).setUpdateable(false).setReadable(true).setMultiValued(true);
+        attrLinks.setRequired(false).setType(String.class).setCreateable(false).setUpdateable(false).setReadable(true).setMultiValued(true);
         roleObjClassBuilder.addAttributeInfo(attrLinks.build());
 
         schemaBuilder.defineObjectClass(roleObjClassBuilder.build());
@@ -107,8 +100,11 @@ public class RoleProcessing extends ObjectProcessing {
 
         OSClient.OSClientV3 os = authenticate(getConfiguration());
         LOG.info("Delete role with UID: {0}", uid.getUidValue());
-        os.identity().roles().delete(uid.getUidValue());
-
+        ActionResponse deleteRoleResponse = os.identity().roles().delete(uid.getUidValue());
+        if (!deleteRoleResponse.isSuccess()) {
+            LOG.info("deleteRole failed!");
+            handleActionResponse(deleteRoleResponse);
+        } else LOG.info("deleteRole success!");
     }
 
     public void updateRole(Uid uid, Set<Attribute> attributes) {
@@ -147,6 +143,7 @@ public class RoleProcessing extends ObjectProcessing {
                 Role role = os.identity().roles().get(uid.getUidValue());
                 convertRoleToConnectorObject(role, handler);
 
+
             } else if (((EqualsFilter) query).getAttribute() instanceof Name) {
                 LOG.info("((EqualsFilter) query).getAttribute().equals(\"name\")");
 
@@ -178,7 +175,7 @@ public class RoleProcessing extends ObjectProcessing {
     }
 
 
-    protected void invalidAttributeValue(String attrName, Filter query) {
+    private void invalidAttributeValue(String attrName, Filter query) {
         StringBuilder sb = new StringBuilder();
         sb.append("Value of").append(attrName).append("attribute not provided for query: ").append(query);
         throw new InvalidAttributeValueException(sb.toString());
@@ -190,11 +187,9 @@ public class RoleProcessing extends ObjectProcessing {
             ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
             builder.setObjectClass(new ObjectClass(ROLE_NAME));
             if (role.getId() != null) {
-                //  builder.addAttribute(ID, role.getId());
                 builder.setUid(new Uid(String.valueOf(role.getId())));
             }
             if (role.getName() != null) {
-                // builder.addAttribute(Name.NAME, role.getName());
                 builder.setName(role.getName());
             }
             if (role.getDomainId() != null) {
@@ -205,8 +200,8 @@ public class RoleProcessing extends ObjectProcessing {
             }
 
             ConnectorObject connectorObject = builder.build();
+            LOG.info("connectorObject is : {0} ", connectorObject);
             handler.handle(connectorObject);
-
         } else throw new UnknownUidException("Returned Role object is null");
     }
 }

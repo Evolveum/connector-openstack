@@ -33,6 +33,10 @@ public class OpenStackConnector implements Connector,
     private static final String ROLE_NAME = "Role";
     private static final String DOMAIN_NAME = "Domain";
 
+    private static final String USERGROUPS = "usergroups";
+    private static final String USERROLES = "userroles";
+    private static final String GROUPROLES = "grouproles";
+
 
     @Override
     public Configuration getConfiguration() {
@@ -54,6 +58,7 @@ public class OpenStackConnector implements Connector,
 
     @Override
     public Uid create(ObjectClass objectClass, Set<Attribute> attributes, OperationOptions operationOptions) {
+        LOG.info("Start create. objectClass: {0}, attributes: {1}, operationOptions: {2} ", objectClass, attributes, operationOptions);
         if (objectClass == null) {
             LOG.error("Attribute of type ObjectClass not provided.");
             throw new InvalidAttributeValueException("Attribute of type ObjectClass not provided.");
@@ -91,17 +96,16 @@ public class OpenStackConnector implements Connector,
 
     @Override
     public void delete(ObjectClass objectClass, Uid uid, OperationOptions operationOptions) {
+        LOG.info("Start delete. objectClass: {0}, uid: {1}, operationOption: {2} ", objectClass, uid, operationOptions);
         if (uid.getUidValue() == null) {
             StringBuilder sb = new StringBuilder();
             sb.append("Uid not provided or empty:").append(uid.getUidValue()).append(";");
             throw new InvalidAttributeValueException(sb.toString());
         }
-        LOG.info("DELETE METHOD UID VALUE: {0}", uid.getUidValue());
 
         if (objectClass == null) {
             throw new InvalidAttributeValueException("ObjectClass value not provided");
         }
-        LOG.info("DELETE METHOD OBJECTCLASS VALUE: {0}", objectClass);
 
         if (objectClass.is(ObjectClass.ACCOUNT_NAME)) {
             UserProcessing user = new UserProcessing(configuration);
@@ -122,11 +126,16 @@ public class OpenStackConnector implements Connector,
         } else if (objectClass.is(DOMAIN_NAME)) {
             DomainProcessing domainProcessing = new DomainProcessing(configuration);
             domainProcessing.deleteDomain(uid);
+        } else {
+            LOG.error("Attribute of type ObjectClass is not supported.");
+            throw new UnsupportedOperationException("Attribute of type ObjectClass is not supported.");
         }
+
     }
 
     @Override
     public Schema schema() {
+        LOG.info("Start Schema.");
         if (this.schema == null) {
             SchemaBuilder schemaBuilder = new SchemaBuilder(OpenStackConnector.class);
 
@@ -208,6 +217,7 @@ public class OpenStackConnector implements Connector,
 
     @Override
     public void test() {
+        LOG.info("Start test.");
         ObjectProcessing objectProcessing = new ObjectProcessing(this.configuration);
         objectProcessing.test();
     }
@@ -231,70 +241,23 @@ public class OpenStackConnector implements Connector,
         if (objectClass.is(ObjectClass.GROUP_NAME)) {
             GroupProcessing groupProcessing = new GroupProcessing(configuration);
             for (Attribute attribute : attributes) {
-                if (attribute.getName().equals("grouproles")) {
-                    for (Object v : attribute.getValue()) {
-                        LOG.info("value {0}", v);
-                        if (!(v instanceof String)) {
-                            LOG.error("Not string!");
-                        } else {
-                            //attribute=projectId:roleId, uid=groupId
-                            if (((String) v).contains(":")) {
-                                String[] split = AttributeUtil.getStringValue(attribute).split(":");
-                                String projectId = split[0];
-                                String roleId = split[1];
-                                String groupId = uid.getUidValue();
-                                LOG.info("projectId: {0}, groupId {1}, roleId {2} ", projectId, groupId, roleId);
-                                groupProcessing.grantProjectGroupRole(projectId, groupId, roleId);
-                            }
-                            //attribute=domainId.roleId, uid=groupId
-                            else if (((String) v).contains(".")) {
-                                String[] split = AttributeUtil.getStringValue(attribute).split(".");
-                                String domainId = split[0];
-                                String roleId = split[1];
-                                String groupId = uid.getUidValue();
-                                LOG.info("domainId: {0}, groupId {1}, roleId {2} ", domainId, groupId, roleId);
-                                groupProcessing.grantDomainGroupRole(domainId, groupId, roleId);
-                            }
-                        }
-                    }
+                if (attribute.getName().equals(GROUPROLES)) {
+                    groupProcessing.grantGroupRoles(attribute, uid);
                 }
             }
         } else if (objectClass.is(ObjectClass.ACCOUNT_NAME)) {
             UserProcessing userProcessing = new UserProcessing(configuration);
             for (Attribute attribute : attributes) {
                 LOG.info("attribute: {0}, attribute name: {1}, attribute value: {2}", attribute, attribute.getName(), attribute.getValue());
-                if (attribute.getName().equals("userroles")) {
-                    for (Object v : attribute.getValue()) {
-                        LOG.info("value {0}", v);
-                        if (!(v instanceof String)) {
-                            LOG.error("Not string!");
-                        } else {
-                            //attribute=projectId:roleId, uid=userId
-                            if (((String) v).contains(":")) {
-                                String[] split = AttributeUtil.getStringValue(attribute).split(":");
-                                String projectId = split[0];
-                                String roleId = split[1];
-                                String userId = uid.getUidValue();
-                                LOG.info("projectId: {0}, userId {1}, roleId {2} ", projectId, userId, roleId);
-                                userProcessing.grantProjectUserRole(projectId, userId, roleId);
-                            }
-                            //attribute=domainId.roleId, uid=userId
-                            else if (((String) v).contains(".")) {
-                                String[] split = AttributeUtil.getStringValue(attribute).split(".");
-                                String domainId = split[0];
-                                String roleId = split[1];
-                                String userId = uid.getUidValue();
-                                LOG.info("domainId: {0}, userId {1}, roleId {2} ", domainId, userId, roleId);
-                                userProcessing.grantDomainUserRole(domainId, userId, roleId);
-                            }
-                        }
-                    }
-                } else if (attribute.getName().equals("usertogroup")) {
-                    String userId = uid.getUidValue();
-                    String groupId = AttributeUtil.getStringValue(attribute);
-                    userProcessing.addUserToGroup(groupId, userId);
+                if (attribute.getName().equals(USERROLES)) {
+                    userProcessing.grantUserRoles(attribute, uid);
+                } else if (attribute.getName().equals(USERGROUPS)) {
+                    userProcessing.userToGroup(attribute, uid);
                 }
             }
+        } else {
+            LOG.error("Attribute of type ObjectClass is not supported.");
+            throw new UnsupportedOperationException("Attribute of type ObjectClass is not supported.");
         }
 
 
@@ -320,70 +283,23 @@ public class OpenStackConnector implements Connector,
         if (objectClass.is(ObjectClass.GROUP_NAME)) {
             GroupProcessing groupProcessing = new GroupProcessing(configuration);
             for (Attribute attribute : attributes) {
-                if (attribute.getName().equals("grouproles")) {
-                    for (Object v : attribute.getValue()) {
-                        LOG.info("value {0}", v);
-                        if (!(v instanceof String)) {
-                            LOG.error("Not string!");
-                        } else {
-                            //attribute=projectId:roleId, uid=groupId
-                            if (((String) v).contains(":")) {
-                                String[] split = AttributeUtil.getStringValue(attribute).split(":");
-                                String projectId = split[0];
-                                String roleId = split[1];
-                                String groupId = uid.getUidValue();
-                                LOG.info("projectId: {0}, groupId {1}, roleId {2} ", projectId, groupId, roleId);
-                                groupProcessing.revokeProjectGroupRole(projectId, groupId, roleId);
-                            }
-                            //attribute=domainId.roleId, uid=groupId
-                            else if (((String) v).contains(".")) {
-                                String[] split = AttributeUtil.getStringValue(attribute).split(".");
-                                String domainId = split[0];
-                                String roleId = split[1];
-                                String groupId = uid.getUidValue();
-                                LOG.info("domainId: {0}, groupId {1}, roleId {2} ", domainId, groupId, roleId);
-                                groupProcessing.revokeDomainGroupRole(domainId, groupId, roleId);
-                            }
-                        }
-                    }
+                if (attribute.getName().equals(GROUPROLES)) {
+                    groupProcessing.revokeGroupRoles(attribute, uid);
                 }
             }
         } else if (objectClass.is(ObjectClass.ACCOUNT_NAME)) {
             UserProcessing userProcessing = new UserProcessing(configuration);
             for (Attribute attribute : attributes) {
-                if (attribute.getName().equals("userroles")) {
-                    for (Object v : attribute.getValue()) {
-                        LOG.info("value {0}", v);
-                        if (!(v instanceof String)) {
-                            LOG.error("Not string!");
-                        } else {
-                            //attribute=projectId:roleId, uid=userId
-                            if (((String) v).contains(":")) {
-                                String[] split = AttributeUtil.getStringValue(attribute).split(":");
-                                String projectId = split[0];
-                                String roleId = split[1];
-                                String userId = uid.getUidValue();
-                                LOG.info("projectId: {0}, userId {1}, roleId {2} ", projectId, userId, roleId);
-                                userProcessing.revokeProjectUserRole(projectId, userId, roleId);
-                            }
-                            //attribute=domainId.roleId, uid=userId
-                            else if (((String) v).contains(".")) {
-                                String[] split = AttributeUtil.getStringValue(attribute).split(".");
-                                String domainId = split[0];
-                                String roleId = split[1];
-                                String userId = uid.getUidValue();
-                                LOG.info("domainId: {0}, userId {1}, roleId {2} ", domainId, userId, roleId);
-                                userProcessing.revokeDomainUserRole(domainId, userId, roleId);
-                            }
-                        }
-
-                    }
-                } else if (attribute.getName().equals("usertogroup")) {
-                    String userId = uid.getUidValue();
-                    String groupId = AttributeUtil.getStringValue(attribute);
-                    userProcessing.removeUserFromGroup(groupId, userId);
+                if (attribute.getName().equals(USERROLES)) {
+                    userProcessing.revokeUserRoles(attribute, uid);
+                } else if (attribute.getName().equals(USERGROUPS)) {
+                    userProcessing.userRemoveFromGroup(attribute, uid);
                 }
+
             }
+        } else {
+            LOG.error("Attribute of type ObjectClass is not supported.");
+            throw new UnsupportedOperationException("Attribute of type ObjectClass is not supported.");
         }
 
         return uid;
@@ -426,6 +342,9 @@ public class OpenStackConnector implements Connector,
             DomainProcessing domainProcessing = new DomainProcessing(configuration);
             domainProcessing.updateDomain(uid, attributes);
 
+        } else {
+            LOG.error("Attribute of type ObjectClass is not supported.");
+            throw new UnsupportedOperationException("Attribute of type ObjectClass is not supported.");
         }
 
         return uid;

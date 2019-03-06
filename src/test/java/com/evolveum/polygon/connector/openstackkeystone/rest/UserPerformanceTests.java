@@ -66,7 +66,7 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
         for (Uid user : usersUid) {
             Set<Attribute> attributesUpdateAccount = new HashSet<Attribute>();
             attributesUpdateAccount.add(AttributeBuilder.build("description", "The Lion King - updated"));
-            attributesUpdateAccount.add(AttributeBuilder.build("enabled", false));
+            attributesUpdateAccount.add(AttributeBuilder.build("__ENABLE__", false));
             attributesUpdateAccount.add(AttributeBuilder.build("__NAME__", "Kovu" + i));
             attributesUpdateAccount.add(AttributeBuilder.build("email", "kovu@lion.com"));
 
@@ -84,13 +84,17 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
 
         OpenStackConnectorConfiguration configuration = getConfiguration();
         OperationOptions options = new OperationOptions(new HashMap<String, Object>());
-        ObjectClass objectClassGroup = ObjectClass.GROUP;
+        ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
+        Set<Attribute> simbaAttributeUid = new HashSet<Attribute>();
+        simbaAttributeUid.add(AttributeBuilder.build("usergroups", prideRockUid.getUidValue()));
 
-        Set<Attribute> usersUidAttributes = new HashSet<Attribute>(usersUid);
+        for (Uid userUid : usersUid) {
+            openStackConnector.init(configuration);
+            openStackConnector.addAttributeValues(objectClassAccount, userUid, simbaAttributeUid, options);
+            openStackConnector.dispose();
+        }
 
-        openStackConnector.init(configuration);
-        openStackConnector.addAttributeValues(objectClassGroup, prideRockUid, usersUidAttributes, options);
-        openStackConnector.dispose();
+
     }
 
 
@@ -135,13 +139,18 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
 
         OpenStackConnectorConfiguration configuration = getConfiguration();
         OperationOptions options = new OperationOptions(new HashMap<String, Object>());
-        ObjectClass objectClassGroup = ObjectClass.GROUP;
+        ObjectClass objectClassAccount = ObjectClass.ACCOUNT;
 
-        Set<Attribute> usersUidAttributes = new HashSet<Attribute>(usersUid);
 
-        openStackConnector.init(configuration);
-        openStackConnector.removeAttributeValues(objectClassGroup, prideRockUid, usersUidAttributes, options);
-        openStackConnector.dispose();
+        Set<Attribute> simbaAttributeUid = new HashSet<Attribute>();
+        simbaAttributeUid.add(AttributeBuilder.build("usergroups", prideRockUid.getUidValue()));
+
+        for (Uid userUid : usersUid) {
+            openStackConnector.init(configuration);
+            openStackConnector.removeAttributeValues(objectClassAccount, userUid, simbaAttributeUid, options);
+            openStackConnector.dispose();
+        }
+
     }
 
     @Test(priority = 25)
@@ -173,7 +182,8 @@ public class UserPerformanceTests extends BasicConfigurationForTests {
         openStackConnector.executeQuery(objectClassGroup, equalsFilter, handlerGroup, options);
         openStackConnector.dispose();
 
-        if (resultsGroup.size() == 0 || resultsGroup.get(0).getAttributeByName("group_members") == null || resultsGroup.get(0).getAttributeByName("group_members").getValue().size() != 0) {
+
+        if ((resultsGroup.size() == 0) || (resultsGroup.get(0).getAttributeByName("group_members") == null) || (resultsGroup.get(0).getAttributeByName("group_members").getValue().size() != 0)) {
             throw new InvalidAttributeValueException("Group doesn't 0 members.");
         }
 

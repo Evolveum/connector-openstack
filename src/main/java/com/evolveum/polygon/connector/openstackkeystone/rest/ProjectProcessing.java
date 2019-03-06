@@ -7,6 +7,7 @@ import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.openstack4j.api.OSClient;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.identity.v3.Project;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneProject;
 
@@ -15,13 +16,9 @@ import java.util.Set;
 
 public class ProjectProcessing extends ObjectProcessing {
 
-    //required
-    private static final String NAME = "name";
-
     //optional
     private static final String DESCRIPTION = "description";
     private static final String DOMAIN_ID = "domain_id";
-    private static final String ENABLED = "enabled";
     private static final String PARENT_ID = "parent_id";
     private static final String PROJECT_NAME = "Project";
 
@@ -37,10 +34,6 @@ public class ProjectProcessing extends ObjectProcessing {
 
         projectObjClassBuilder.setType(PROJECT_NAME);
 
-//
-//        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
-//        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
-//        projectObjClassBuilder.addAttributeInfo(attrName.build());
 
         AttributeInfoBuilder attrDescription = new AttributeInfoBuilder(DESCRIPTION);
         attrDescription.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
@@ -50,9 +43,7 @@ public class ProjectProcessing extends ObjectProcessing {
         attrDomainId.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
         projectObjClassBuilder.addAttributeInfo(attrDomainId.build());
 
-        AttributeInfoBuilder attrEnabled = new AttributeInfoBuilder(ENABLED);
-        attrEnabled.setRequired(false).setType(Boolean.class).setCreateable(true).setUpdateable(true).setReadable(true);
-        projectObjClassBuilder.addAttributeInfo(attrEnabled.build());
+        projectObjClassBuilder.addAttributeInfo(OperationalAttributeInfos.ENABLE);
 
         //immutable
         AttributeInfoBuilder attrParentId = new AttributeInfoBuilder(PARENT_ID);
@@ -96,7 +87,7 @@ public class ProjectProcessing extends ObjectProcessing {
                 project.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute));
             }
 
-            if (attribute.getName().equals(ENABLED)) {
+            if (attribute.getName().equals(OperationalAttributes.ENABLE_NAME)) {
                 project.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute));
             }
             if (attribute.getName().equals(PARENT_ID)) {
@@ -126,9 +117,11 @@ public class ProjectProcessing extends ObjectProcessing {
 
         OSClient.OSClientV3 os = authenticate(getConfiguration());
         LOG.info("Delete project with UID: {0}", uid.getUidValue());
-        os.identity().projects().delete(uid.getUidValue());
-
-
+        ActionResponse deleteProjectResponse = os.identity().projects().delete(uid.getUidValue());
+        if (!deleteProjectResponse.isSuccess()) {
+            LOG.info("deleteProject failed!");
+            handleActionResponse(deleteProjectResponse);
+        } else LOG.info("deleteProject success!");
     }
 
     public void updateProject(Uid uid, Set<Attribute> attributes) {
@@ -143,7 +136,7 @@ public class ProjectProcessing extends ObjectProcessing {
                 if (attribute.getName().equals(DOMAIN_ID)) {
                     project = os.identity().projects().update(project.toBuilder().domainId(AttributeUtil.getAsStringValue(attribute)).build());
                 }
-                if (attribute.getName().equals(ENABLED)) {
+                if (attribute.getName().equals(OperationalAttributes.ENABLE_NAME)) {
                     project = os.identity().projects().update(project.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute)).build());
                 }
                 if (attribute.getName().equals(Name.NAME)) {
@@ -204,7 +197,7 @@ public class ProjectProcessing extends ObjectProcessing {
     }
 
 
-    protected void invalidAttributeValue(String attrName, Filter query) {
+    private void invalidAttributeValue(String attrName, Filter query) {
         StringBuilder sb = new StringBuilder();
         sb.append("Value of").append(attrName).append("attribute not provided for query: ").append(query);
         throw new InvalidAttributeValueException(sb.toString());
@@ -219,7 +212,6 @@ public class ProjectProcessing extends ObjectProcessing {
                 builder.setUid(new Uid(String.valueOf(project.getId())));
             }
             if (project.getName() != null) {
-                // builder.addAttribute(NAME, project.getName());
                 builder.setName(project.getName());
             }
             if (project.getDescription() != null) {
@@ -232,9 +224,9 @@ public class ProjectProcessing extends ObjectProcessing {
                 builder.addAttribute(PARENT_ID, project.getParentId());
             }
             if (project.isEnabled()) {
-                builder.addAttribute(ENABLED, true);
+                builder.addAttribute(OperationalAttributes.ENABLE_NAME, true);
             } else {
-                builder.addAttribute(ENABLED, false);
+                builder.addAttribute(OperationalAttributes.ENABLE_NAME, false);
             }
             if (project.getLinks() != null) {
                 builder.addAttribute(LINKS, project.getLinks());
@@ -246,6 +238,4 @@ public class ProjectProcessing extends ObjectProcessing {
         } else throw new UnknownUidException("Returned Project object is null");
 
     }
-
-
 }

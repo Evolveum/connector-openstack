@@ -215,7 +215,7 @@ public class DeleteActionTests extends BasicConfigurationForTests {
         Set<Attribute> attributesCreatedUser = new HashSet<Attribute>();
         attributesCreatedUser.add(AttributeBuilder.build("__NAME__", "Banzai"));
         attributesCreatedUser.add(AttributeBuilder.build("description", "Cartoon"));
-        attributesCreatedUser.add(AttributeBuilder.build("enabled", true));
+        attributesCreatedUser.add(AttributeBuilder.build("__ENABLE__", true));
 //        attributesCreatedUser.add(AttributeBuilder.build("password", "LionKing99"));
         attributesCreatedUser.add(AttributeBuilder.build("domain_id", "default"));
         attributesCreatedUser.add(AttributeBuilder.build("default_project_id", "project"));

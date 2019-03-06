@@ -7,6 +7,7 @@ import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.openstack4j.api.OSClient;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.identity.v3.Domain;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneDomain;
 
@@ -18,13 +19,9 @@ public class DomainProcessing extends ObjectProcessing {
         super(configuration);
     }
 
-    //required
-    private static final String NAME = "name";
-
     //optional
     private static final String DOMAIN_NAME = "Domain";
     private static final String DESCRIPTION = "description";
-    private static final String ENABLED = "enabled";
 
     private static final String LINKS = "links";
 
@@ -35,18 +32,12 @@ public class DomainProcessing extends ObjectProcessing {
 
         domainObjectClass.setType(DOMAIN_NAME);
 
-//        AttributeInfoBuilder attrName = new AttributeInfoBuilder(NAME);
-//        attrName.setRequired(true).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
-//        domainObjectClass.addAttributeInfo(attrName.build());
-
 
         AttributeInfoBuilder attrDescription = new AttributeInfoBuilder(DESCRIPTION);
         attrDescription.setRequired(false).setType(String.class).setCreateable(true).setUpdateable(true).setReadable(true);
         domainObjectClass.addAttributeInfo(attrDescription.build());
 
-        AttributeInfoBuilder attrMembers = new AttributeInfoBuilder(ENABLED);
-        attrMembers.setRequired(false).setType(Boolean.class).setCreateable(true).setUpdateable(true).setReadable(true);
-        domainObjectClass.addAttributeInfo(attrMembers.build());
+        domainObjectClass.addAttributeInfo(OperationalAttributeInfos.ENABLE);
 
         schemaBuilder.defineObjectClass(domainObjectClass.build());
 
@@ -81,7 +72,7 @@ public class DomainProcessing extends ObjectProcessing {
                 domain.toBuilder().description(AttributeUtil.getAsStringValue(attribute));
             }
 
-            if (attribute.getName().equals(ENABLED)) {
+            if (attribute.getName().equals(OperationalAttributes.ENABLE_NAME)) {
                 domain.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute));
             }
         }
@@ -107,8 +98,12 @@ public class DomainProcessing extends ObjectProcessing {
 
         OSClient.OSClientV3 os = authenticate(getConfiguration());
         LOG.info("Delete domain with UID: {0}", uid.getUidValue());
-        os.identity().domains().delete(uid.getUidValue());
 
+        ActionResponse deleteDomainResponse = os.identity().domains().delete(uid.getUidValue());
+        if (!deleteDomainResponse.isSuccess()) {
+            LOG.info("deleteDomain failed!");
+            handleActionResponse(deleteDomainResponse);
+        } else LOG.info("deleteDomain success!");
 
     }
 
@@ -120,9 +115,7 @@ public class DomainProcessing extends ObjectProcessing {
         LOG.info("Domain is : {0}", domain);
         if (domain != null) {
             for (Attribute attribute : attributes) {
-
-
-                if (attribute.getName().equals(ENABLED)) {
+                if (attribute.getName().equals(OperationalAttributes.ENABLE_NAME)) {
                     domain = os.identity().domains().update(domain.toBuilder().enabled(AttributeUtil.getBooleanValue(attribute)).build());
                 }
                 if (attribute.getName().equals(Name.NAME)) {
@@ -183,7 +176,7 @@ public class DomainProcessing extends ObjectProcessing {
     }
 
 
-    protected void invalidAttributeValue(String attrName, Filter query) {
+    private void invalidAttributeValue(String attrName, Filter query) {
         StringBuilder sb = new StringBuilder();
         sb.append("Value of").append(attrName).append("attribute not provided for query: ").append(query);
         throw new InvalidAttributeValueException(sb.toString());
@@ -205,9 +198,9 @@ public class DomainProcessing extends ObjectProcessing {
                 builder.addAttribute(DESCRIPTION, domain.getDescription());
             }
             if (domain.isEnabled()) {
-                builder.addAttribute(ENABLED, true);
+                builder.addAttribute(OperationalAttributes.ENABLE_NAME, true);
             } else {
-                builder.addAttribute(ENABLED, false);
+                builder.addAttribute(OperationalAttributes.ENABLE_NAME, false);
             }
             if (domain.getLinks() != null) {
                 builder.addAttribute(LINKS, domain.getLinks());

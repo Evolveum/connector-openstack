@@ -27,7 +27,7 @@ public class DomainPerformanceTests extends BasicConfigurationForTests {
 
             Set<Attribute> attributesCreateDomain = new HashSet<Attribute>();
             attributesCreateDomain.add(AttributeBuilder.build("description", "The Lion King"));
-            attributesCreateDomain.add(AttributeBuilder.build("enabled", true));
+            attributesCreateDomain.add(AttributeBuilder.build("__ENABLE__", true));
             attributesCreateDomain.add(AttributeBuilder.build("__NAME__", "Mufasa domain" + i));
 
             openStackConnector.init(configuration);
@@ -54,7 +54,7 @@ public class DomainPerformanceTests extends BasicConfigurationForTests {
             Set<Attribute> attributesUpdateDomain = new HashSet<Attribute>();
             attributesUpdateDomain.add(AttributeBuilder.build("description", "The Lion King - updated"));
             attributesUpdateDomain.add(AttributeBuilder.build("__NAME__", "Scar Domain " + i));
-            attributesUpdateDomain.add(AttributeBuilder.build("enabled", false));
+            attributesUpdateDomain.add(AttributeBuilder.build("__ENABLE__", false));
 
             openStackConnector.init(configuration);
             openStackConnector.update(objectClassDomain, domainUid, attributesUpdateDomain, options);
@@ -65,15 +65,15 @@ public class DomainPerformanceTests extends BasicConfigurationForTests {
 
     @Test(priority = 34)
     public void Delete500GDomainTest() {
-        OpenStackConnector gitlabRestConnector = new OpenStackConnector();
+        OpenStackConnector openStackConnector = new OpenStackConnector();
         OpenStackConnectorConfiguration configuration = getConfiguration();
         ObjectClass objectClassDomain = new ObjectClass("Domain");
         OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         for (Uid domain : domainsUid) {
-            gitlabRestConnector.init(configuration);
-            gitlabRestConnector.delete(objectClassDomain, domain, options);
-            gitlabRestConnector.dispose();
+            openStackConnector.init(configuration);
+            openStackConnector.delete(objectClassDomain, domain, options);
+            openStackConnector.dispose();
         }
     }
 

@@ -26,7 +26,7 @@ public class ProjectPerformanceTests extends BasicConfigurationForTests {
 
             Set<Attribute> attributesCreateProject = new HashSet<Attribute>();
             attributesCreateProject.add(AttributeBuilder.build("description", "The Lion King"));
-            attributesCreateProject.add(AttributeBuilder.build("enabled", true));
+            attributesCreateProject.add(AttributeBuilder.build("__ENABLE__", true));
             attributesCreateProject.add(AttributeBuilder.build("__NAME__", "Nala project" + i));
             attributesCreateProject.add(AttributeBuilder.build("domain_id", "default"));
 
@@ -64,15 +64,15 @@ public class ProjectPerformanceTests extends BasicConfigurationForTests {
 
     @Test(priority = 42)
     public void Delete500GProjectTest() {
-        OpenStackConnector gitlabRestConnector = new OpenStackConnector();
+        OpenStackConnector openStackConnector = new OpenStackConnector();
         OpenStackConnectorConfiguration configuration = getConfiguration();
         ObjectClass objectClassProject = new ObjectClass("Project");
         OperationOptions options = new OperationOptions(new HashMap<String, Object>());
 
         for (Uid project : projectsUid) {
-            gitlabRestConnector.init(configuration);
-            gitlabRestConnector.delete(objectClassProject, project, options);
-            gitlabRestConnector.dispose();
+            openStackConnector.init(configuration);
+            openStackConnector.delete(objectClassProject, project, options);
+            openStackConnector.dispose();
         }
     }
 

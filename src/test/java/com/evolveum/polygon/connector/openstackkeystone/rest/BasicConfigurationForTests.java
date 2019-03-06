@@ -9,7 +9,7 @@ public class BasicConfigurationForTests {
         configuration.setDomainName(parser.getDomainName());
         configuration.setEndpoint(parser.getEndpoint());
         configuration.setProjectName(parser.getProjectName());
-        configuration.setSecret(parser.getSecret());
+        configuration.setPassword(parser.getSecret());
         configuration.setUserId(parser.getUserId());
 
         return configuration;
